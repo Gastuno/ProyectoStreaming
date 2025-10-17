@@ -5,16 +5,14 @@ import '../MediaProfiles/MovieProfile.css';
 function MovieProfile() {
   const location = useLocation();
 
-  // Expect movie/media object to be passed via navigation state from MainScreen
   const media = location.state?.movie || location.state?.media || null;
 
-  // If no media was passed, render a simple fallback message
   if (!media) {
     return (
       <div className="movie-profile-container">
         <div className="movie-profile-info-box">
-          <h1 className="movie-profile-title">No media selected</h1>
-          <p className="movie-profile-description">Please navigate here by clicking a media item from the main screen.</p>
+          <h1 className="movie-profile-title">NULL</h1>
+          <p className="movie-profile-description">NULL</p>
         </div>
       </div>
     );

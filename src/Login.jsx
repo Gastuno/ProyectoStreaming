@@ -11,9 +11,15 @@ function Login() {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (username === 'user' && password === 'pass') {
+
+    if (username === 'admin' && password === 'pass') {
       setError('');
-      navigate('/main');
+      sessionStorage.setItem('role', 'admin');
+      navigate('/main', { state: { role: 'admin' } });
+    } else if (username === 'user' && password === 'pass') {
+      setError('');
+      sessionStorage.setItem('role', 'user');
+      navigate('/main', { state: { role: 'user' } });
     } else {
       setError('Nombre de usuario o contraseña incorrectos');
     }
@@ -54,5 +60,7 @@ return (
   </>
 );
 }
+
+//figure out why the side text is not showing up
 
 export default Login;

@@ -49,7 +49,7 @@
   font-size: 1rem;
 }
 
-.genre-menu {
+.menu {
   background-color: #ff151500;
   border-top: 3px solid rgb(255, 255, 255);
   border-bottom: 3px solid rgb(255, 255, 255);
@@ -57,7 +57,21 @@
   margin-top: 1rem;
 }
 
-.genre-menu button {
+.menu button {
+  background-color: #ff151500;
+  color: #fff;
+  border-left: 1px solid rgb(255, 255, 255);
+  border-left: 1px solid rgb(255, 255, 255);
+  padding-left: 15vh;
+  padding-right: 15vh;
+  border-style: outset;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.button2 {
+  top: 0;
+  left: 0;
   background-color: #ff151500;
   color: #fff;
   border-left: 1px solid rgb(255, 255, 255);
