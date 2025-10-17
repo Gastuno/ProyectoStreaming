@@ -1,5 +1,6 @@
 import "./MainScreen.css";
 import Cover from './assets/placeholder.jpg';
+import Video from './assets/placeholdervid.mp4';
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -8,12 +9,12 @@ function MainScreen() {
   const location = useLocation();
 
   const [movies, setMovies] = useState([
-    { name: 'Pelicula Peliculasa Peliculera', cover: Cover, genres: ['Accion', 'Comedia'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', saved: (true), fav: (true)},
-    { name: 'Pelicula 2', cover: Cover, genres: ['Accion'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', saved: (true), fav: (false)},
-    { name: 'Pelicula 5', cover: Cover, genres: ['Drama', 'Accion'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', saved: (true), fav: (false)},
-    { name: 'Pelicula 6', cover: Cover, genres: ['Romance'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', saved: false, fav: (false)},
-    { name: 'Pelicula 7', cover: Cover, genres: ['Comedia', 'Accion'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', saved: (true), fav: (false)},
-    { name: 'Pelicula 8', cover: Cover, genres: ['Sci-Fi'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', saved: false, fav: (false)},
+    { name: 'Pelicula Peliculasa Peliculera', video: Video, cover: Cover, genres: ['Accion', 'Comedia'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', saved: (true), fav: (true)},
+    { name: 'Pelicula 2', video: Video, cover: Cover, genres: ['Accion'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', saved: (true), fav: (false)},
+    { name: 'Pelicula 5', video: Video, cover: Cover, genres: ['Drama', 'Accion'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', saved: (true), fav: (false)},
+    { name: 'Pelicula 6', video: Video, cover: Cover, genres: ['Romance'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', saved: false, fav: (false)},
+    { name: 'Pelicula 7', video: Video, cover: Cover, genres: ['Comedia', 'Accion'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', saved: (true), fav: (false)},
+    { name: 'Pelicula 8', video: Video, cover: Cover, genres: ['Sci-Fi'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', saved: false, fav: (false)},
     { name: 'Serie 1', cover: Cover, genres: ['Romance', 'Drama'], type: 'Serie', description: 'Placeholder', saved: (true), fav: (false), chapters: [
       { name: 'Capítulo 1', duration: '45m' },
       { name: 'Capítulo 2', duration: '50m' },
@@ -123,20 +124,19 @@ function MainScreen() {
         <button onClick={() => {setSelectedType('Serie'); setSelectedGenre('All'); setShowBiblioteca(false)}} className={selectedType === 'Serie' ? 'active' : ''}>Series</button>
         <button onClick={() => {setSelectedType('All'); setSelectedGenre('All'); setShowBiblioteca(true)}}>Biblioteca</button>
         <nav className="menu">
-          <button onClick={() => setSelectedGenre('All')} className={selectedGenre === 'All' ? 'active' : ''}>Todas</button>
-          <button onClick={() => setSelectedGenre('Accion')} className={selectedGenre === 'Accion' ? 'active' : ''}>Accion</button>
-          <button onClick={() => setSelectedGenre('Romance')} className={selectedGenre === 'Romance' ? 'active' : ''}>Romance</button>
-          <button onClick={() => setSelectedGenre('Comedia')} className={selectedGenre === 'Comedia' ? 'active' : ''}>Comedia</button>
-          <button onClick={() => setSelectedGenre('Drama')} className={selectedGenre === 'Drama' ? 'active' : ''}>Drama</button>
-          <button onClick={() => setSelectedGenre('Sci-Fi')} className={selectedGenre === 'Sci-Fi' ? 'active' : ''}>Sci-Fi</button>
-          <button onClick={() => setSelectedGenre('Horror')} className={selectedGenre === 'Horror' ? 'active' : ''}>Horror</button>
+          <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('All')}} className={selectedGenre === 'All' ? 'active' : ''}>Todas</button>
+          <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Accion')}} className={selectedGenre === 'Accion' ? 'active' : ''}>Accion</button>
+          <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Romance')}} className={selectedGenre === 'Romance' ? 'active' : ''}>Romance</button>
+          <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Comedia')}} className={selectedGenre === 'Comedia' ? 'active' : ''}>Comedia</button>
+          <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Drama')}} className={selectedGenre === 'Drama' ? 'active' : ''}>Drama</button>
+          <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Sci-Fi')}} className={selectedGenre === 'Sci-Fi' ? 'active' : ''}>Sci-Fi</button>
+          <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Horror')}} className={selectedGenre === 'Horror' ? 'active' : ''}>Horror</button>
         </nav>
       </nav>
 
     {role === 'admin' && <nav className="adminmenu">
       <h2>Controles Administrativos</h2>
       <button className="button2" onClick={() => setShowAddForm(true)}>Agregar Contenido</button>
-      <button className="button2" onClick={() => setShowAddForm(true)}>Agregar Genero</button>
     </nav>}
 
       {showAddForm && (
