@@ -1,0 +1,74 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.login-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 25vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(25, 25, 25, 0.704);
+  border-right: 3px solid rgb(255, 255, 255);
+  z-index: 1;
+  min-width: 250px;
+  border-radius: 12px;
+}
+
+.side-image {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 100vw;
+  height: 100vh;
+  -webkit-mask-image: linear-gradient(to bottom, white 0%, transparent 95%  );
+  mask-image: linear-gradient(to bottom,white 0%,transparent 95%);
+  overflow: hidden;
+  z-index: 0;
+}
+
+.side-image .side-text {
+  position: fixed;
+  bottom: 50vh;
+  right: 0;
+  color: rgb(255, 255, 255);
+  margin: 20px;
+  font: x-large;
+  z-index: 1;
+}
+
+.side-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.side-image header {
+  position: fixed;
+  top: 0;
+  right: 0;
+}
+
+.login-container input {
+  width: 20vh;
+  height: 3vh;
+  min-height: 20px;
+  min-width: 200px;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.login-container button {
+  align-self: center;
+  width: 15vh;
+  height: 5vh;
+  min-height: 50px;
+  min-width: 70px;
+  font-size: 1.1rem;
+  border-radius: 12px;
+}
