@@ -9,18 +9,29 @@ function MainScreen() {
   const location = useLocation();
 
   const [movies, setMovies] = useState([
-    { name: 'Pelicula Peliculasa Peliculera', video: Video, cover: Cover, genres: ['Accion', 'Comedia'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', saved: (true), fav: (true)},
-    { name: 'Pelicula 2', video: Video, cover: Cover, genres: ['Accion'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', saved: (true), fav: (false)},
-    { name: 'Pelicula 5', video: Video, cover: Cover, genres: ['Drama', 'Accion'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', saved: (true), fav: (false)},
-    { name: 'Pelicula 6', video: Video, cover: Cover, genres: ['Romance'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', saved: false, fav: (false)},
-    { name: 'Pelicula 7', video: Video, cover: Cover, genres: ['Comedia', 'Accion'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', saved: (true), fav: (false)},
-    { name: 'Pelicula 8', video: Video, cover: Cover, genres: ['Sci-Fi'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', saved: false, fav: (false)},
-    { name: 'Serie 1', cover: Cover, genres: ['Romance', 'Drama'], type: 'Serie', description: 'Placeholder', saved: (true), fav: (false), chapters: [
+    { name: 'Pelicula Peliculasa Peliculera', video: Video, cover: Cover, genres: ['Accion', 'Comedia'], type: 'Movie', description: 'Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.', duration: '2h 30m', stars: 5,saved: (true), fav: (true)},
+    { name: 'Pelicula 2', video: Video, cover: Cover, genres: ['Accion'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', stars: 3, saved: (true), fav: (false)},
+    { name: 'Pelicula 5', video: Video, cover: Cover, genres: ['Drama', 'Accion'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', stars: 2.28, saved: (true), fav: (false)},
+    { name: 'Pelicula 6', video: Video, cover: Cover, genres: ['Romance'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', stars: 0, saved: false, fav: (false)},
+    { name: 'Pelicula 7', video: Video, cover: Cover, genres: ['Comedia', 'Accion'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', stars: 5, saved: (true), fav: (false)},
+    { name: 'Pelicula 8', video: Video, cover: Cover, genres: ['Sci-Fi'], type: 'Movie', description: 'Placeholder', duration: '2h 30m', stars: 5, saved: false, fav: (false)},
+    
+    { name: 'Serie 1', cover: Cover, genres: ['Romance', 'Drama'], type: 'Serie', description: 'Placeholder', stars: 5, saved: (true), fav: (false), chapters: [
       { name: 'Capítulo 1', duration: '45m' },
       { name: 'Capítulo 2', duration: '50m' },
+      { name: 'Capítulo 3', duration: '40m' },
+      { name: 'Capítulo 3', duration: '40m' },
+      { name: 'Capítulo 3', duration: '40m' },
+      { name: 'Capítulo 3', duration: '40m' },
+      { name: 'Capítulo 3', duration: '40m' },
+      { name: 'Capítulo 3', duration: '40m' },
+      { name: 'Capítulo 3', duration: '40m' },
+      { name: 'Capítulo 3', duration: '40m' },
+      { name: 'Capítulo 3', duration: '40m' },
+      { name: 'Capítulo 3', duration: '40m' },
       { name: 'Capítulo 3', duration: '40m' }
     ] },
-    { name: 'Serie 2', cover: Cover, genres: ['Horror'], type: 'Serie', description: 'Placeholder', saved: (true), fav: (true), chapters: [
+    { name: 'Serie 2', cover: Cover, genres: ['Horror'], type: 'Serie', description: 'Placeholder', stars: 5, saved: (true), fav: (true), chapters: [
       { name: 'Episodio 1', duration: '42m' },
       { name: 'Episodio 2', duration: '39m' }
     ] },
@@ -86,7 +97,7 @@ function MainScreen() {
     filteredMovies = filteredMovies.filter(movie => movie.saved === (true));
   }
 
-  const columns = 4;
+  const columns = 7;
   const moviesList = filteredMovies.filter(m => m.type === 'Movie');
   const seriesList = filteredMovies.filter(m => m.type === 'Serie');
   const faves = filteredMovies.filter(m => m.fav === (true));
@@ -210,6 +221,9 @@ function MainScreen() {
                     <td key={colIdx} className="movie-cell">
                       <button className="pelicula-click" onClick={() => handleMovieClick(movie)}>
                         <img src={movie.cover} alt={movie.name} className="movie-cover" />
+                        <button class="play-overlay">
+
+                        </button>
                       </button>
                       <button className="pelicula-click" onClick={() => handleMovieClick(movie)}>
                         {movie.name}

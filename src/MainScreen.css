@@ -1,12 +1,75 @@
 .movies-table {
   width: 100%;
   border-collapse: separate;
-  table-layout: fixed;
+  table-layout: flex;
 }
+
+.topmenu {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: center;        
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  box-shadow: 0 2px 16px rgba(164,79,255,0.08);
+  background: transparent;
+  overflow-x: auto;        
+  -webkit-overflow-scrolling: touch;
+}
+
+.topmenu button {
+  background: rgba(255,255,255,0.06);
+  color: #ffffff;
+  border: none;
+  padding: 10px 16px;         
+  border-radius: 12px;        
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1.02rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  min-width: 72px;            
+}
+
+.topmenu button:hover,
+.topmenu button:focus {
+  transform: translateY(-1px);
+  outline: none;
+  box-shadow: 0 6px 20px rgba(164,79,255,0.12);
+}
+
+.topmenu button.active {
+  background: linear-gradient(90deg, #a44fff, #7cc7ff);
+  color: #021018;
+  box-shadow: 0 8px 28px rgba(124,199,255,0.18);
+}
+
+@media (min-width: 901px) {
+  .topmenu {
+    justify-content: center;
+    padding: 14px 28px;
+  }
+}
+
+.menu,
+.menu button,
+.button2 {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  box-shadow: none;
+}
+
 
 .Movie-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 1rem;
 }
 
@@ -20,15 +83,39 @@
   justify-content: flex-start;
 }
 
+.movie-cell:hover .movie-cover {
+  box-shadow: 0 8px 40px rgba(170, 91, 255, 0.688);
+}
+
 /* omg fix text not centring correctly */
 
 .movie-cover {
-  width: 250px;
-  height: 250px;
+  width: 100%;
+  max-width: 250px;
+  aspect-ratio: 1/1;
   object-fit: cover;
   border-radius: 8px;
   margin-bottom: 0.5rem;
   display: block;
+  transition: box-shadow 0.2s;
+}
+
+@media (max-width: 900px) {
+  .Movie-row {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+  .movie-cover {
+    max-width: 160px;
+  }
+}
+
+@media (max-width: 600px) {
+  .Movie-row {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  }
+  .movie-cover {
+    max-width: 110px;
+  }
 }
 
 .movie-name {
@@ -51,8 +138,6 @@
 
 .menu {
   background-color: #ff151500;
-  border-top: 3px solid rgb(255, 255, 255);
-  border-bottom: 3px solid rgb(255, 255, 255);
   gap: 1rem;
   margin-top: 1rem;
 }

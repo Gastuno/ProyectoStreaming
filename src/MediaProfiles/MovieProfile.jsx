@@ -24,6 +24,7 @@ function MovieProfile() {
   const [playerOpen, setPlayerOpen] = useState(false);
   const [playerSrc, setPlayerSrc] = useState('');
   const videoRef = useRef(null);
+  const uid = useRef(`stars-${Math.random().toString(36).slice(2,9)}`);
 
   const openPlayer = (src) => {
     setPlayerSrc(src || media.video || DefaultVideo);
@@ -40,7 +41,7 @@ function MovieProfile() {
       const el = videoRef.current;
       const request = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
       if (request) {
-        try { request.call(el); } catch (e) { /* ignore */ }
+        try { request.call(el); } catch (e) {}
       }
     }
 
@@ -70,16 +71,41 @@ function MovieProfile() {
       style={{ backgroundImage: `url(${media.cover || ''})` }}
     >
       <div className="movie-profile-info-box">
-        <h1 className="movie-profile-title">{media.name}</h1>
+          <div className="movie-profile-header">
+            <img src={media.cover} alt={`${media.name} cover`} className="movie-profile-thumb" />
+            <div style={{display:'flex',flexDirection:'column'}}>
+              <h1 className="movie-profile-title">{media.name}</h1>
 
-        <div className="movie-profile-genres">
+              <div className="movie-profile-genres">
           {Array.isArray(media.genres) ? media.genres.join(', ') : media.genres}
           {isSeries ? (
             ` · ${chapters.length} capítulos`
           ) : (
             media.duration ? ` · ${media.duration}` : ''
           )}
-        </div>
+              </div>
+              <div className="movie-profile-stars">
+          {Array.from({ length: 5 }).map((_, i) => {
+            const raw = Number(media.stars) || 0;
+            const fill = Math.max(0, Math.min(1, raw - i));
+            const gid = `${uid.current}-g-${i}`;
+            return (
+              <svg key={i} className="star-svg" viewBox="0 0 24 24" aria-hidden="true">
+                <defs>
+                  <linearGradient id={gid} x1="0%" x2="100%" y1="0%" y2="0%">
+                    <stop offset={`${fill * 100}%`} stopColor="#FFD166" />
+                    <stop offset={`${fill * 100}%`} stopColor="transparent" />
+                  </linearGradient>
+                </defs>
+                <path className="star-bg" d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.788 1.402 8.172L12 18.897l-7.336 3.873 1.402-8.172L.132 9.21l8.2-1.192z" />
+                <path className="star-fill" d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.788 1.402 8.172L12 18.897l-7.336 3.873 1.402-8.172L.132 9.21l8.2-1.192z" fill={`url(#${gid})`} />
+              </svg>
+            );
+          })}
+          <span className="stars-label">{Number(media.stars) || 0}/5</span>
+              </div>
+            </div>
+          </div>
 
         <p className="movie-profile-description">{media.description}</p>
 
