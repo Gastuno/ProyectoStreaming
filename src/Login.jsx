@@ -53,7 +53,6 @@ return (
       {error && <p style={{ color: 'red' }}>{error}</p>}
     </div>
     <div className="side-image">
-      <div className="side-text">MILES DE PELICULAS</div>
       <img src={loginImage} alt="Side" />
       
     </div>

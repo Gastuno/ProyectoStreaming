@@ -13,7 +13,7 @@ const router = createBrowserRouter([
     element: <MainScreen />,
   },
   {
-    path: '/movie/:name',
+    path: '/movie/:id',
     element: <MovieProfile />,
   },
 ]);
