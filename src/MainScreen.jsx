@@ -1,10 +1,11 @@
 import "./MainScreen.css";
 import Cover from './assets/placeholder.jpg';
-import Video from './assets/placeholdervid.mp4';
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
-import { collection, getDocs } from "firebase/firestore";
+import { addDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "./firebaseconfig";
+
+
 
 function MainScreen() {
   const navigate = useNavigate();
@@ -12,50 +13,67 @@ function MainScreen() {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchGenres = async () => {
-  const generoBd = await getDocs(collection(db, "genero"));
-  const generoList = generoBd.docs.map(doc => ({ idGenero: doc.id, ...doc.data() }));
-  return generoList;
-  };
-
-  const fetchGenresDet = async () => {
-  const generoDetBd = await getDocs(collection(db, "generos"));
-  return generoDetBd.docs.map(doc => doc.data()); 
-  };
-
-  useEffect(() => {
-    const fetchMovies = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "Producto"));
-        const fetched = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
+useEffect(() => {
+  const fetchMovies = async () => {
+    try {
+      // 1. Load all products
+      const prodSnap = await getDocs(collection(db, "Producto"));
+      const products = prodSnap.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
       }));
-        
-        const adapted = fetched.map(item => ({
-          id: item.id,
-          name: item.nombre,
-          cover: item.portada && item.portada !== "url" ? item.portada : Cover, 
-          type: item.tipo === "Pelicula" ? "Movie" : "Serie",
-          duration: item["duracion-m"] || "",
-          stars: item.puntaje || 0,
+
+      // 2. Load all genres
+      const generoBd = await getDocs(collection(db, "Genero"));
+      const genreList = generoBd.docs.map(doc => ({
+        idGenero: doc.id,
+        ...doc.data()
+      }));
+
+      // 3. Load the linking table (product–genre)
+      const generoDetBd = await getDocs(collection(db, "Generos"));
+      const generoLinks = generoDetBd.docs.map(doc => doc.data());
+
+      // 4. Build final products with actual genres
+      const adapted = products.map(prod => {
+        // Find relationship entries of this product
+        const matched = generoLinks.filter(g => g.idProd === prod.id);
+
+        // Convert IDs → genre names
+        const genres = matched.map(rel => {
+          const gen = genreList.find(g => g.idGenero === rel.idGenero);
+          return gen ? gen.nombre : "Desconocido";
+        });
+
+        console.log("Movie genres from Firebase:", genres);
+
+        return {
+          id: prod.id,
+          name: prod.nombre,
+          cover: prod.portada && prod.portada !== "url" ? prod.portada : Cover,
+          type: prod.tipo === "Pelicula" ? "Movie" : "Serie",
+          duration: prod["duracion-m"] || "",
+          stars: prod.puntaje || 0,
           saved: true,
           fav: false,
-          genres: ["Desconocido"], 
-          description: item.descripcion || "",
-          numTemps: item.numTemps || 0
-        }));
+          genres: genres.length > 0 ? genres : ["Desconocido"],
+          description: prod.descripcion || "",
+          numTemps: prod.numTemps || 0
+        };
+      });
 
-        setMovies(adapted);
-      } catch (error) {
-        console.error("Error obteniendo productos:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+      setMovies(adapted);
 
-    fetchMovies();
-  }, []);
+    } catch (error) {
+      console.error("Error loading movies with genres:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchMovies();
+}, []);
+
 
   const [role, setRole] = useState('user');
   useEffect(() => {
@@ -77,28 +95,74 @@ function MainScreen() {
     setNewTitle(''); setNewGenres(''); setNewType('Movie'); setNewDuration(''); setNewDescription(''); setNewChaptersText('');
   };
 
-  const handleAddSubmit = (e) => {
-    e.preventDefault();
-    const addedGenres = newGenres.split(',').map(g => g.trim()).filter(Boolean);
-    let chapters = [];
-    if (newType === 'Serie' && newChaptersText.trim()) {
-      chapters = newChaptersText.split(',').map(part => {
-        const [name, duration] = part.split(':').map(p => p && p.trim());
-        return { name: name || 'Untitled', duration: duration || '' };
+  const handleAddSubmit = async (e) => {
+  e.preventDefault();
+  
+  try {
+    // Split genre input
+    const inputGenres = newGenres
+      .split(',')
+      .map(g => g.trim())
+      .filter(Boolean);
+
+    // 1️⃣ Save product in Producto
+    const productoRef = await addDoc(collection(db, "Producto"), {
+      fechaLanz: new Date(),
+      descripcion: newDescription,
+      'duracion-m': newDuration,
+      mov: "",
+      nombre: newTitle,
+      numTemps: newType === "Serie" ? 1 : null,
+      portada: "url",   // or upload later
+      tipo: newType === "Movie" ? "Pelicula" : "Serie",
+      "duracion-m": newType === "Movie" ? newDuration : null,
+    });
+
+    const productoId = productoRef.id;
+    console.log("Producto guardado con ID:", productoId);
+
+    // 2️⃣ For each genre: find existing or create new
+    for (const genreName of inputGenres) {
+      // Search for existing genre in Genero
+      const qGenre = query(
+        collection(db, "Genero"),
+        where("nombre", "==", genreName)
+      );
+
+      const snap = await getDocs(qGenre);
+
+      let genreId;
+
+      if (snap.empty) {
+        // Create new genre
+        const newGenreRef = await addDoc(collection(db, "Genero"), {
+          nombre: genreName
+        });
+        genreId = newGenreRef.id;
+        console.log("Nuevo género creado:", genreName, genreId);
+      } else {
+        // Existing genre found
+        genreId = snap.docs[0].id;
+        console.log("Género encontrado:", genreName, genreId);
+      }
+
+      // 3️⃣ Link product to this genre in Generos
+      await addDoc(collection(db, "Generos"), {
+        idProducto: productoId,
+        idGenero: genreId
       });
+
+      console.log("Link creado:", productoId, " → ", genreId);
     }
-    const movieObj = {
-      name: newTitle || 'Untitled',
-      cover: Cover,
-      genres: addedGenres,
-      type: newType,
-      description: newDescription || '',
-      duration: newType === 'Movie' ? (newDuration || '') : undefined,
-      chapters: newType === 'Serie' ? chapters : undefined,
-    };
-    setMovies(prev => [movieObj, ...prev]);
+
+    alert("Contenido guardado en Firebase!");
     setShowAddForm(false);
     resetForm();
+
+  } catch (error) {
+    console.error("Error guardando en Firebase:", error);
+    alert("Error guardando contenido.");
+  }
   };
 
   const [selectedGenre, setSelectedGenre] = useState('All');
@@ -147,6 +211,7 @@ const handleMovieClick = (movie) => {
     navigate(`/movie/${encodeURIComponent(movie.id)}`);
 };
 
+
   return (
     <div className="main">
       <nav className="topmenu">
@@ -161,7 +226,7 @@ const handleMovieClick = (movie) => {
           <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Comedia')}} className={selectedGenre === 'Comedia' ? 'active' : ''}>Comedia</button>
           <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Drama')}} className={selectedGenre === 'Drama' ? 'active' : ''}>Drama</button>
           <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Sci-Fi')}} className={selectedGenre === 'Sci-Fi' ? 'active' : ''}>Sci-Fi</button>
-          <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Horror')}} className={selectedGenre === 'Horror' ? 'active' : ''}>Horror</button>
+          <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Terror')}} className={selectedGenre === 'Terror' ? 'active' : ''}>Terror</button>
         </nav>
       </nav>
 

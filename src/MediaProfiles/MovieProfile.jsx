@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+import { db } from '../firebaseconfig';
 import '../MediaProfiles/MovieProfile.css';
 import DefaultVideo from '../assets/placeholdervid.mp4';
 import DefaultCover from '../assets/placeholder.jpg';
