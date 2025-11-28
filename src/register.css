@@ -59,8 +59,14 @@
 }
 
 .btn-registrar {
-    background: linear-gradient(90deg, #a44fff, #7cc7ff); /* Verde para registrar */
+    background: linear-gradient(90deg, #a44fff, #7cc7ff);
+    transition: box-shadow 0.3s ease, background 0.3s ease, color 0.3s ease;
     color: white;
+}
+
+.btn-registrar:hover {
+    color: white;
+    box-shadow: 0 8px 40px rgba(170, 91, 255, 0.688);
 }
 
 .btn-registrar.active {
@@ -68,12 +74,14 @@
 }
 
 .btn-volver {
-    background-color: #6c757d; /* Gris para volver */
-    color: white;
+    background-color: #6c757d00;
+    color: rgb(0, 0, 0);
 }
 
-.btn-volver:hover:not(:disabled) {
-    background-color: #5a6268;
+.btn-volver:hover {
+    background-color: #6c757d00;
+    color: #7cc7ff;
+    
 }
 
 .error-message {

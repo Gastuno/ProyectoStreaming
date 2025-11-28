@@ -30,8 +30,12 @@ function Login() {
         return;
       }
 
+      //DATOS DE SESION
+
+      const userId = user.uid;
       const { nivel } = userSnap.data();
 
+      sessionStorage.setItem('userId', userId);
       sessionStorage.setItem('role', nivel === 1 ? 'admin' : 'user');
 
       if (nivel === 1) {
@@ -72,10 +76,12 @@ function Login() {
             />
           </div>
 
+          <div className="button-container">
           <button type="submit">Iniciar Sesión</button>
           <button type="button" onClick={() => navigate('/register')}>
             Registrarse
           </button>
+          </div>
 
         </form>
 

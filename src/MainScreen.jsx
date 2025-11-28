@@ -5,48 +5,69 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { addDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "./firebaseconfig";
 
-
-
 function MainScreen() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [movies, setMovies] = useState([]);
+  const [uid, setUserId] = useState(null); 
+  const [faveIds, setFaveIds] = useState([]);
+
+//interaccion bd
+useEffect(() => {
+      const sid = sessionStorage.getItem('userId');
+      if (sid) {
+          setUserId(sid);
+      }
+  }, []);
 
 useEffect(() => {
+    if (!uid) { 
+        setLoading(false);
+        return; 
+    }
+
   const fetchMovies = async () => {
     try {
-      // 1. Load all products
+      //cargar faves
+      const qFaves = query(
+      collection(db, "UsuarioFaves"),
+      where("idUser", "==", uid) 
+      );
+      
+      const favesSnap = await getDocs(qFaves);
+      const faveIds = favesSnap.docs.map(doc => doc.data().idFave);
+      setFaveIds(faveIds); 
+
+      //cargar productos
       const prodSnap = await getDocs(collection(db, "Producto"));
       const products = prodSnap.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
-
-      // 2. Load all genres
+      //cargar generos
       const generoBd = await getDocs(collection(db, "Genero"));
       const genreList = generoBd.docs.map(doc => ({
         idGenero: doc.id,
         ...doc.data()
       }));
 
-      // 3. Load the linking table (product–genre)
+      setGenresList(genreList.map(g => g.nombre));
+
       const generoDetBd = await getDocs(collection(db, "Generos"));
       const generoLinks = generoDetBd.docs.map(doc => doc.data());
 
-      // 4. Build final products with actual genres
       const adapted = products.map(prod => {
-        // Find relationship entries of this product
-        const matched = generoLinks.filter(g => g.idProd === prod.id);
-
-        // Convert IDs → genre names
-        const genres = matched.map(rel => {
-          const gen = genreList.find(g => g.idGenero === rel.idGenero);
-          return gen ? gen.nombre : "Desconocido";
-        });
+        const matched = generoLinks.filter(g => g.idProducto === prod.id || g.idProd === prod.id);
+        const saved = faveIds.includes(prod.id);
+        const genres = Array.from(new Set(matched.map(rel => {
+          const genreId = rel.idGenero || rel.idGen || rel.generoId;
+          const gen = genreList.find(g => g.idGenero === genreId);
+          return gen ? String(gen.nombre).trim() : null;
+        }).filter(Boolean)));
 
         console.log("Movie genres from Firebase:", genres);
-
+        
         return {
           id: prod.id,
           name: prod.nombre,
@@ -54,7 +75,7 @@ useEffect(() => {
           type: prod.tipo === "Pelicula" ? "Movie" : "Serie",
           duration: prod["duracion-m"] || "",
           stars: prod.puntaje || 0,
-          saved: true,
+          saved: saved,
           fav: false,
           genres: genres.length > 0 ? genres : ["Desconocido"],
           description: prod.descripcion || "",
@@ -62,6 +83,7 @@ useEffect(() => {
         };
       });
 
+      
       setMovies(adapted);
 
     } catch (error) {
@@ -72,7 +94,7 @@ useEffect(() => {
   };
 
   fetchMovies();
-}, []);
+}, [uid]);
 
 
   const [role, setRole] = useState('user');
@@ -85,45 +107,52 @@ useEffect(() => {
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTitle, setNewTitle] = useState('');
-  const [newGenres, setNewGenres] = useState('');
+  const [newGenres, setNewGenres] = useState([]);
   const [newType, setNewType] = useState('Movie');
   const [newDuration, setNewDuration] = useState('');
   const [newDescription, setNewDescription] = useState('');
+  const [newDirector, setNewDirector] = useState('');
+  const [newUrl, setNewUrl] = useState('');
   const [newChaptersText, setNewChaptersText] = useState('');
+  const [procesando, setProcesando] = useState(false);
 
   const resetForm = () => {
-    setNewTitle(''); setNewGenres(''); setNewType('Movie'); setNewDuration(''); setNewDescription(''); setNewChaptersText('');
+    setNewTitle(''); setNewGenres([]); setNewType('Movie'); setNewDuration(''); setNewDescription(''); setNewChaptersText('');
   };
 
   const handleAddSubmit = async (e) => {
   e.preventDefault();
-  
-  try {
-    // Split genre input
-    const inputGenres = newGenres
-      .split(',')
-      .map(g => g.trim())
-      .filter(Boolean);
 
-    // 1️⃣ Save product in Producto
+  if (procesando) return; 
+  setProcesando(true);
+
+
+  //interaccion BD crear peli
+
+  try {
+    let inputGenres = [];
+    if (Array.isArray(newGenres)) {
+      inputGenres = newGenres.map(g => String(g).trim()).filter(Boolean);
+    } else {
+      inputGenres = String(newGenres).split(',').map(g => g.trim()).filter(Boolean);
+    }
+
     const productoRef = await addDoc(collection(db, "Producto"), {
       fechaLanz: new Date(),
       descripcion: newDescription,
       'duracion-m': newDuration,
+      director: newDirector,
       mov: "",
       nombre: newTitle,
       numTemps: newType === "Serie" ? 1 : null,
-      portada: "url",   // or upload later
+      portada: newUrl ? newUrl : "url",
       tipo: newType === "Movie" ? "Pelicula" : "Serie",
-      "duracion-m": newType === "Movie" ? newDuration : null,
     });
 
     const productoId = productoRef.id;
     console.log("Producto guardado con ID:", productoId);
 
-    // 2️⃣ For each genre: find existing or create new
     for (const genreName of inputGenres) {
-      // Search for existing genre in Genero
       const qGenre = query(
         collection(db, "Genero"),
         where("nombre", "==", genreName)
@@ -134,19 +163,16 @@ useEffect(() => {
       let genreId;
 
       if (snap.empty) {
-        // Create new genre
         const newGenreRef = await addDoc(collection(db, "Genero"), {
           nombre: genreName
         });
         genreId = newGenreRef.id;
         console.log("Nuevo género creado:", genreName, genreId);
       } else {
-        // Existing genre found
         genreId = snap.docs[0].id;
         console.log("Género encontrado:", genreName, genreId);
       }
 
-      // 3️⃣ Link product to this genre in Generos
       await addDoc(collection(db, "Generos"), {
         idProducto: productoId,
         idGenero: genreId
@@ -158,17 +184,23 @@ useEffect(() => {
     alert("Contenido guardado en Firebase!");
     setShowAddForm(false);
     resetForm();
+    setProcesando(false);
+
+    window.location.reload();
 
   } catch (error) {
     console.error("Error guardando en Firebase:", error);
     alert("Error guardando contenido.");
+    setProcesando(false);
   }
   };
 
   const [selectedGenre, setSelectedGenre] = useState('All');
   const [selectedType, setSelectedType] = useState('All');
   const [showBiblioteca, setShowBiblioteca] = useState(false);
+  const [searchMov, setSearch] = useState('')
 
+//filtros
 
   let filteredMovies = movies;
   if (selectedType !== 'All') {
@@ -180,11 +212,18 @@ useEffect(() => {
   if (showBiblioteca == (true)) {
     filteredMovies = filteredMovies.filter(movie => movie.saved === (true));
   }
+  if (searchMov.trim() !== '') {
+    const searchLower = searchMov.toLowerCase();
+    filteredMovies = filteredMovies.filter(movie => movie.name.toLowerCase().includes(searchLower));
+  }
 
+  const [genresList, setGenresList] = useState([]);
   const columns = 7;
   const moviesList = filteredMovies.filter(m => m.type === 'Movie');
   const seriesList = filteredMovies.filter(m => m.type === 'Serie');
   const faves = filteredMovies.filter(m => m.fav === (true));
+  
+  //tabla
 
   const rowsForMovies = [];
   for (let i = 0; i < moviesList.length; i += columns) {
@@ -211,6 +250,7 @@ const handleMovieClick = (movie) => {
     navigate(`/movie/${encodeURIComponent(movie.id)}`);
 };
 
+  // Menus de arriba
 
   return (
     <div className="main">
@@ -219,6 +259,7 @@ const handleMovieClick = (movie) => {
         <button onClick={() => {setSelectedType('Movie'); setSelectedGenre('All'); setShowBiblioteca(false)}} className={selectedType === 'Movie' ? 'active' : ''}>Peliculas</button>
         <button onClick={() => {setSelectedType('Serie'); setSelectedGenre('All'); setShowBiblioteca(false)}} className={selectedType === 'Serie' ? 'active' : ''}>Series</button>
         <button onClick={() => {setSelectedType('All'); setSelectedGenre('All'); setShowBiblioteca(true)}}>Biblioteca</button>
+        <input type="text" placeholder="Buscar..." value={searchMov} onChange={e => setSearch(e.target.value)} style={{marginLeft:16,padding:'4px 8px',borderRadius:4,border:'1px solid #ccc',minWidth:160}} />
         <nav className="menu">
           <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('All')}} className={selectedGenre === 'All' ? 'active' : ''}>Todas</button>
           <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Accion')}} className={selectedGenre === 'Accion' ? 'active' : ''}>Accion</button>
@@ -240,18 +281,33 @@ const handleMovieClick = (movie) => {
           <form onSubmit={handleAddSubmit} style={{background:'#222',padding:20,borderRadius:8,minWidth:320,color:'#fff'}}>
             <h3>Agregar nuevo elemento</h3>
             <div><label>Título</label><br/><input value={newTitle} onChange={e=>setNewTitle(e.target.value)} required /></div>
-            <div><label>Géneros</label><br/><input value={newGenres} onChange={e=>setNewGenres(e.target.value)} placeholder="Accion, Comedia" /></div>
             <div><label>Tipo</label><br/>
               <select value={newType} onChange={e=>setNewType(e.target.value)}>
                 <option value="Movie">Pelicula</option>
                 <option value="Serie">Serie</option>
               </select>
             </div>
-            {newType === 'Movie' && <div><label>Duración</label><br/><input value={newDuration} onChange={e=>setNewDuration(e.target.value)} placeholder="2h 10m" /></div>}
+            <div><label>Géneros</label><br/>
+            {genresList.map(g => (
+              <label key={g}>
+                <input
+                  type="checkbox"
+                  value={g}
+                  checked={newGenres.includes(g)}
+                  onChange={e => {
+                    if (e.target.checked) {setNewGenres([...newGenres, g]);} else {setNewGenres(newGenres.filter(x => x !== g));}
+                  }}
+                />
+                {g}
+              </label>
+            ))}
+            </div>
+            {newType === 'Movie' && <div><label>Duración(minutos)</label><br/><input value={newDuration} onChange={e=>setNewDuration(e.target.value)} placeholder="120" /></div>}
             <div><label>Descripción</label><br/><textarea value={newDescription} onChange={e=>setNewDescription(e.target.value)} /></div>
+            <div><label>Url Portada</label><br/><textarea value={newUrl} onChange={e=>setNewUrl(e.target.value)} /></div>
             <div style={{marginTop:8}}>
-              <button type="submit">Agregar</button>
-              <button type="button" onClick={()=>{setShowAddForm(false); resetForm();}} style={{marginLeft:8}}>Cancelar</button>
+            <button type="submit" disabled={procesando}> {procesando ? 'Guardando...' : 'Agregar'}</button>
+            <button type="button" onClick={()=>{setShowAddForm(false); resetForm();}} style={{marginLeft:8}}>Cancelar</button>
             </div>
           </form>
         </div>
@@ -292,35 +348,6 @@ const handleMovieClick = (movie) => {
           ))}
         </tbody>
       </table>
-
-      {/* FAVOURITESES*/}
-      
-      {rowsForFaves.length > 0 && showBiblioteca && (
-        <>
-          <h2>Favoritos</h2>
-          <table className="movies-table">
-            <tbody>
-              {rowsForFaves.map((row, rowIdx) => (
-                <tr key={rowIdx} className="Movie-row">
-                  {row.map((movie, colIdx) => (
-                    <td key={colIdx} className="movie-cell">
-                      <button className="pelicula-click" onClick={() => handleMovieClick(movie)}>
-                        <img src={movie.cover} alt={movie.name} className="movie-cover" />
-                        <button class="play-overlay">
-
-                        </button>
-                      </button>
-                      <button className="pelicula-click" onClick={() => handleMovieClick(movie)}>
-                        {movie.name}
-                      </button>
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
-      )}
     </div>
   );
 }
