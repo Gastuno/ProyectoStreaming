@@ -11,16 +11,35 @@ function MovieProfile() {
   const [media, setMedia] = useState(null);
   const [loading, setLoading] = useState(true);
   const [genres, setGenres] = useState([]);
+
+  // formulario
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [addingEp, setAddingEp] = useState(false);
+
+  // player
   const [playerOpen, setPlayerOpen] = useState(false);
   const [playerSrc, setPlayerSrc] = useState('');
   const videoRef = useRef(null);
+
+  // biblioteca
   const uid = useRef(`stars-${Math.random().toString(36).slice(2, 9)}`);
-  const [userId, setUserId] = useState(null); 
-  const [faveIds, setFaveIds] = useState([]);
-  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [faveDocId, setFaveDocId] = useState(null);
+
+  // series
   const [selectedSeason, setSelectedSeason] = useState(1);
+  const [episodes, setEpisodes] = useState([]);
+
+  // rol
+  const [role, setRole] = useState(sessionStorage.getItem('role') || 'user');
+
+  // agregar stuff
+  const [newEpName, setNewEpName] = useState('');
+  const [newEpDesc, setNewEpDesc] = useState('');
+  const [newEpDuration, setNewEpDuration] = useState('');
+  const [newEpMov, setNewEpMov] = useState('');
+  const [newEpNumTemp, setNewEpNumTemp] = useState(1);
 
   useEffect(() => {
     const checkSaved = async () => {
@@ -44,7 +63,6 @@ function MovieProfile() {
     checkSaved();
   }, [id]);
 
-  // fetch product and genres
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -57,25 +75,22 @@ function MovieProfile() {
           try {
             const generoDetSnap = await getDocs(collection(db, 'Generos'));
             const generoLinks = generoDetSnap.docs.map(d => d.data());
-
             const generoSnap = await getDocs(collection(db, 'Genero'));
             const genreList = generoSnap.docs.map(d => ({ idGenero: d.id, ...d.data() }));
-
             const matched = generoLinks.filter(g => g.idProducto === id || g.idProd === id || g.id === id);
             const names = Array.from(new Set(matched.map(rel => {
               const gid = rel.idGenero || rel.idGen || rel.generoId;
               const gen = genreList.find(x => x.idGenero === gid);
               return gen ? String(gen.nombre).trim() : null;
             }).filter(Boolean)));
-
             if (names.length > 0) setGenres(names);
             else if (Array.isArray(data.genres) && data.genres.length > 0) setGenres(data.genres.map(g => String(g).trim()));
           } catch (e) {
-            console.error('Error cargando géneros relacionados:', e);
+            console.error('Error de genero', e);
             if (Array.isArray(data.genres) && data.genres.length > 0) setGenres(data.genres.map(g => String(g).trim()));
           }
         } else {
-          console.error('No se encontró el producto');
+          console.error('No se encontr el producto');
         }
       } catch (err) {
         console.error('Error al obtener datos:', err);
@@ -85,6 +100,32 @@ function MovieProfile() {
     };
     fetchData();
   }, [id]);
+
+  useEffect(() => {
+    const fetchEpisodes = async () => {
+      if (!media || !media.tipo?.toLowerCase().includes("serie")) return;
+
+      try {
+        const q = query(
+            collection(db, 'Capitulo'), 
+            where('idSerie', '==', id), 
+            where('numTemp', '==', selectedSeason)
+        );
+
+        const querySnapshot = await getDocs(q);
+        const fetchedEpisodes = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        setEpisodes(fetchedEpisodes);
+      } catch (error) {
+        console.error("Error cargando capítulos:", error);
+      }
+    };
+
+    fetchEpisodes();
+  }, [id, selectedSeason, media]); 
 
   const openPlayer = (src) => {
     setPlayerSrc(src || DefaultVideo);
@@ -99,35 +140,21 @@ function MovieProfile() {
   useEffect(() => {
     if (playerOpen && videoRef.current) {
       const el = videoRef.current;
-      const request =
-        el.requestFullscreen ||
-        el.webkitRequestFullscreen ||
-        el.mozRequestFullScreen ||
-        el.msRequestFullscreen;
+      const request = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
       if (request) {
-        try {
-          request.call(el);
-        } catch (e) {}
+        try { request.call(el); } catch (e) {}
       }
     }
-
     const onFsChange = () => {
-      if (
-        !document.fullscreenElement &&
-        !document.webkitFullscreenElement &&
-        !document.mozFullScreenElement &&
-        !document.msFullscreenElement
-      ) {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement && !document.msFullscreenElement) {
         setPlayerOpen(false);
         setPlayerSrc('');
       }
     };
-
     document.addEventListener('fullscreenchange', onFsChange);
     document.addEventListener('webkitfullscreenchange', onFsChange);
     document.addEventListener('mozfullscreenchange', onFsChange);
     document.addEventListener('MSFullscreenChange', onFsChange);
-
     return () => {
       document.removeEventListener('fullscreenchange', onFsChange);
       document.removeEventListener('webkitfullscreenchange', onFsChange);
@@ -136,22 +163,11 @@ function MovieProfile() {
     };
   }, [playerOpen]);
 
-  if (loading)
-    return (
-      <div className="movie-profile-container">
-        <p>Cargando...</p>
-      </div>
-    );
-  if (!media)
-    return (
-      <div className="movie-profile-container">
-        <p>No se encontró el producto.</p>
-      </div>
-    );
+  if (loading) return <div className="movie-profile-container"><p>Cargando...</p></div>;
+  if (!media) return <div className="movie-profile-container"><p>No se encontró el producto.</p></div>;
 
   const isSeries = media.tipo?.toLowerCase().includes("serie");
   const totalSeasons = Math.max(1, Number(media.numTemps) || 1);
-  const episodesPerSeason = Math.max(1, Number(media.capTemps) || Number(media.capTemp) || 10);
 
   return (
     <div
@@ -160,20 +176,12 @@ function MovieProfile() {
     >
       <div className="movie-profile-info-box">
         <div className="movie-profile-header">
-          <img
-            src={media.portada}
-            alt={`${media.nombre} portada`}
-            className="movie-profile-thumb"
-          />
+          <img src={media.portada} alt={`${media.nombre} portada`} className="movie-profile-thumb" />
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <h1 className="movie-profile-title">{media.nombre}</h1>
 
             <div className="movie-profile-genres">
-              {genres && genres.length > 0 ? (
-                genres.join(' · ')
-              ) : (
-                media.genres && media.genres.length > 0 ? media.genres.join(' · ') : 'Sin género'
-              )}
+              {genres && genres.length > 0 ? genres.join(' · ') : (media.genres && media.genres.length > 0 ? media.genres.join(' · ') : 'Sin género')}
             </div>
 
             <div className="movie-profile-genres">
@@ -188,45 +196,19 @@ function MovieProfile() {
                 const fill = Math.max(0, Math.min(1, raw - i));
                 const gid = `${uid.current}-g-${i}`;
                 return (
-                  <svg
-                    key={i}
-                    className="star-svg"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
+                  <svg key={i} className="star-svg" viewBox="0 0 24 24" aria-hidden="true">
                     <defs>
-                      <linearGradient
-                        id={gid}
-                        x1="0%"
-                        x2="100%"
-                        y1="0%"
-                        y2="0%"
-                      >
-                        <stop
-                          offset={`${fill * 100}%`}
-                          stopColor="#FFD166"
-                        />
-                        <stop
-                          offset={`${fill * 100}%`}
-                          stopColor="transparent"
-                        />
+                      <linearGradient id={gid} x1="0%" x2="100%" y1="0%" y2="0%">
+                        <stop offset={`${fill * 100}%`} stopColor="#FFD166" />
+                        <stop offset={`${fill * 100}%`} stopColor="transparent" />
                       </linearGradient>
                     </defs>
-                    <path
-                      className="star-bg"
-                      d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.788 1.402 8.172L12 18.897l-7.336 3.873 1.402-8.172L.132 9.21l8.2-1.192z"
-                    />
-                    <path
-                      className="star-fill"
-                      d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.788 1.402 8.172L12 18.897l-7.336 3.873 1.402-8.172L.132 9.21l8.2-1.192z"
-                      fill={`url(#${gid})`}
-                    />
+                    <path className="star-bg" d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.788 1.402 8.172L12 18.897l-7.336 3.873 1.402-8.172L.132 9.21l8.2-1.192z" />
+                    <path className="star-fill" d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.788 1.402 8.172L12 18.897l-7.336 3.873 1.402-8.172L.132 9.21l8.2-1.192z" fill={`url(#${gid})`} />
                   </svg>
                 );
               })}
-              <span className="stars-label">
-                {Number(media.puntaje) || 0}/5
-              </span>
+              <span className="stars-label">{Number(media.puntaje) || 0}/5</span>
             </div>
           </div>
         </div>
@@ -235,39 +217,26 @@ function MovieProfile() {
           {media.descripcion || 'Sin descripción disponible'}
         </p>
 
-        {/* Interaccion Biblioteca */}
-
         <div style={{ marginTop: 12 }}>
-        {!isSeries && (<button onClick={() => openPlayer(media.video)}>Play</button>)}
+          {!isSeries && (<button onClick={() => openPlayer(media.video)}>Play</button>)}
           <button
             onClick={async () => {
               if (saving) return;
               const user = auth.currentUser;
               setSaving(true);
               try {
-
-                //ELIMINAR
-
                 if (saved) {
                   if (faveDocId) {
                     await deleteDoc(doc(db, 'UsuarioFaves', faveDocId));
                   } else {
                     const q = query(collection(db, 'UsuarioFaves'), where('idUser', '==', user.uid), where('idFave', '==', id));
                     const existing = await getDocs(q);
-                    for (const d of existing.docs) {
-                      await deleteDoc(doc(db, 'UsuarioFaves', d.id));
-                    }
+                    for (const d of existing.docs) { await deleteDoc(doc(db, 'UsuarioFaves', d.id)); }
                   }
                   setSaved(false);
                   setFaveDocId(null);
                 } else {
-
-                  //GUARDAR
-
-                  const ref = await addDoc(collection(db, 'UsuarioFaves'), {
-                    idUser: user.uid,
-                    idFave: id
-                  });
+                  const ref = await addDoc(collection(db, 'UsuarioFaves'), { idUser: user.uid, idFave: id });
                   setSaved(true);
                   setFaveDocId(ref.id);
                 }
@@ -284,6 +253,53 @@ function MovieProfile() {
             {saving ? 'Cargando...' : saved ? 'Quitar' : 'Guardar'}
           </button>
         </div>
+
+        {role === 'admin' && <nav className="adminmenu">
+        <h2>Controles Administrativos</h2>
+        <button className="button2" onClick={() => setShowAddForm(true)}>Agregar Contenido</button>
+        </nav>}
+
+        {showAddForm && (
+          <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.6)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:2500}}>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              if (addingEp) return;
+              setAddingEp(true);
+              try {
+                await addDoc(collection(db, 'Capitulo'), {
+                  nombre: newEpName,
+                  descripcion: newEpDesc,
+                  'duracion-m': newEpDuration,
+                  mov: newEpMov || '',
+                  idSerie: id,
+                  numTemp: Number(newEpNumTemp) || 1
+                });
+                alert('Capítulo agregado correctamente.');
+                setNewEpName(''); setNewEpDesc(''); setNewEpDuration(''); setNewEpMov(''); setNewEpNumTemp(1);
+                setShowAddForm(false);
+                const q = query(collection(db, 'Capitulo'), where('idSerie','==', id), where('numTemp','==', selectedSeason));
+                const snap = await getDocs(q);
+                setEpisodes(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+              } catch (err) {
+                console.error('Error agregando capítulo:', err);
+                alert('Error al agregar capítulo. Revisa la consola.');
+              } finally {
+                setAddingEp(false);
+              }
+            }} style={{background:'#222',padding:20,borderRadius:8,minWidth:360,color:'#fff'}}>
+              <h3>Agregar nuevo capítulo</h3>
+              <div><label>Nombre</label><br/><input required value={newEpName} onChange={e=>setNewEpName(e.target.value)} /></div>
+              <div><label>Descripción</label><br/><textarea value={newEpDesc} onChange={e=>setNewEpDesc(e.target.value)} /></div>
+              <div><label>Duración (min)</label><br/><input value={newEpDuration} onChange={e=>setNewEpDuration(e.target.value)} placeholder="45" /></div>
+              <div><label>URL (mov)</label><br/><input value={newEpMov} onChange={e=>setNewEpMov(e.target.value)} placeholder="(opcional)" /></div>
+              <div><label>Temporada (numTemp)</label><br/><input type="number" min={1} value={newEpNumTemp} onChange={e=>setNewEpNumTemp(e.target.value)} /></div>
+              <div style={{marginTop:8}}>
+                <button type="submit" disabled={addingEp}>{addingEp ? 'Guardando...' : 'Agregar capítulo'}</button>
+                <button type="button" onClick={()=>setShowAddForm(false)} style={{marginLeft:8}}>Cancelar</button>
+              </div>
+            </form>
+          </div>
+        )}
 
         {isSeries && (
           <div className="series-section" style={{ marginTop: 18 }}>
@@ -304,18 +320,33 @@ function MovieProfile() {
               <thead>
                 <tr>
                   <th style={{ textAlign: 'left', padding: 8 }}>Capítulo</th>
+                  <th style={{ textAlign: 'left', padding: 8 }}>Duración</th>
                   <th style={{ textAlign: 'left', padding: 8 }}>Acción</th>
                 </tr>
               </thead>
               <tbody>
-                {Array.from({ length: episodesPerSeason }).map((_, idx) => (
-                  <tr key={idx} style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                    <td style={{ padding: 8 }}>Temporada {selectedSeason} · Capítulo {idx + 1}</td>
-                    <td style={{ padding: 8 }}>
-                      <button onClick={() => openPlayer(media.video || DefaultVideo)}>Play</button>
-                    </td>
-                  </tr>
-                ))}
+                {episodes.length > 0 ? (
+                    episodes.map((ep) => (
+                    <tr key={ep.id} style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                        <td style={{ padding: 8 }}>
+                            <div style={{ fontWeight: 'bold' }}>{ep.nombre}</div>
+                            <div style={{ fontSize: '0.85em', opacity: 0.7 }}>{ep.descripcion}</div>
+                        </td>
+                        <td style={{ padding: 8 }}>
+                             {ep['duracion-m'] || ep.duracion_m || ''} min
+                        </td>
+                        <td style={{ padding: 8 }}>
+                        <button onClick={() => openPlayer(ep.mov)}>Play</button>
+                        </td>
+                    </tr>
+                    ))
+                ) : (
+                    <tr>
+                        <td colSpan="3" style={{ padding: 20, textAlign: 'center', opacity: 0.7 }}>
+                            Sin capitulos por el momento!
+                        </td>
+                    </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -325,25 +356,17 @@ function MovieProfile() {
       {playerOpen && (
         <div
           style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.9)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 3000
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.9)', display: 'flex',
+            alignItems: 'center', justifyContent: 'center', zIndex: 3000
           }}
         >
           <div style={{ position: 'absolute', right: 20, top: 20 }}>
-            <button onClick={closePlayer} style={{ padding: 8 }}>
-              Cerrar
-            </button>
+            <button onClick={closePlayer} style={{ padding: 8 }}>Cerrar</button>
           </div>
           <video
             ref={videoRef}
             src={playerSrc || DefaultVideo}
-            controls
-            autoPlay
+            controls autoPlay
             style={{ width: '100%', height: '100%', objectFit: 'contain' }}
             onEnded={closePlayer}
           />
