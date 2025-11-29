@@ -124,7 +124,7 @@ useEffect(() => {
   e.preventDefault();
 
   if (procesando) return; 
-  setProcesando(true);
+  setProcesando(true);
 
 
   //interaccion BD crear peli
@@ -181,7 +181,7 @@ useEffect(() => {
       console.log("Link creado:", productoId, " → ", genreId);
     }
 
-    alert("Contenido guardado en Firebase!");
+    alert("Contenido agregado con exito.");
     setShowAddForm(false);
     resetForm();
     setProcesando(false);
@@ -189,7 +189,7 @@ useEffect(() => {
     window.location.reload();
 
   } catch (error) {
-    console.error("Error guardando en Firebase:", error);
+    console.error("Error guardando contenido.", error);
     alert("Error guardando contenido.");
     setProcesando(false);
   }
@@ -255,10 +255,10 @@ const handleMovieClick = (movie) => {
   return (
     <div className="main">
       <nav className="topmenu">
-        <button onClick={() => {setSelectedType('All'); setSelectedGenre('All'); setShowBiblioteca(false)}}>Home</button>
+        <button onClick={() => {setSelectedType('All'); setSelectedGenre('All'); setShowBiblioteca(false)}}className={selectedType === 'All' && selectedGenre === 'All' && !showBiblioteca ? 'active' : '' }>Home</button>
         <button onClick={() => {setSelectedType('Movie'); setSelectedGenre('All'); setShowBiblioteca(false)}} className={selectedType === 'Movie' ? 'active' : ''}>Peliculas</button>
         <button onClick={() => {setSelectedType('Serie'); setSelectedGenre('All'); setShowBiblioteca(false)}} className={selectedType === 'Serie' ? 'active' : ''}>Series</button>
-        <button onClick={() => {setSelectedType('All'); setSelectedGenre('All'); setShowBiblioteca(true)}}>Biblioteca</button>
+        <button onClick={() => {setSelectedType('All'); setSelectedGenre('All'); setShowBiblioteca(true)}}className={showBiblioteca ? 'active' : ''}>Biblioteca</button>
         <input type="text" placeholder="Buscar..." value={searchMov} onChange={e => setSearch(e.target.value)} style={{marginLeft:16,padding:'4px 8px',borderRadius:4,border:'1px solid #ccc',minWidth:160}} />
         <nav className="menu">
           <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('All')}} className={selectedGenre === 'All' ? 'active' : ''}>Todas</button>

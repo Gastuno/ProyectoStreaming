@@ -18,6 +18,13 @@
   font-family: Inter, Roboto, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
 }
 
+.series-section{
+  width: 100%;
+  margin-top: 12px;
+  border-collapse: collapse;
+  background: #16161692;
+}
+
 .movie-profile-container::before {
   content: '';
   position: fixed;
