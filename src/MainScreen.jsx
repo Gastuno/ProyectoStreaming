@@ -13,6 +13,12 @@ function MainScreen() {
   const [uid, setUserId] = useState(null); 
   const [faveIds, setFaveIds] = useState([]);
 
+  const getImageSrc = (portada) => {
+    if (!portada || portada === "url") return Cover;
+    if (portada.startsWith('http://') || portada.startsWith('https://')) return portada;
+    return new URL(`./assets/${portada}`, import.meta.url).href;
+  };
+
 //interaccion bd
 useEffect(() => {
       const sid = sessionStorage.getItem('userId');
@@ -66,12 +72,12 @@ useEffect(() => {
           return gen ? String(gen.nombre).trim() : null;
         }).filter(Boolean)));
 
-        console.log("Movie genres from Firebase:", genres);
+        console.log("Generos: ", genres);
         
         return {
           id: prod.id,
           name: prod.nombre,
-          cover: prod.portada && prod.portada !== "url" ? prod.portada : Cover,
+          cover: getImageSrc(prod.portada),
           type: prod.tipo === "Pelicula" ? "Movie" : "Serie",
           duration: prod["duracion-m"] || "",
           stars: prod.puntaje || 0,
@@ -87,7 +93,7 @@ useEffect(() => {
       setMovies(adapted);
 
     } catch (error) {
-      console.error("Error loading movies with genres:", error);
+      console.error("Error load ing movies", error);
     } finally {
       setLoading(false);
     }
@@ -200,7 +206,7 @@ useEffect(() => {
   const [showBiblioteca, setShowBiblioteca] = useState(false);
   const [searchMov, setSearch] = useState('')
 
-//filtros
+//logica filtros
 
   let filteredMovies = movies;
   if (selectedType !== 'All') {
@@ -223,7 +229,7 @@ useEffect(() => {
   const seriesList = filteredMovies.filter(m => m.type === 'Serie');
   const faves = filteredMovies.filter(m => m.fav === (true));
   
-  //tabla
+  //logica tablas
 
   const rowsForMovies = [];
   for (let i = 0; i < moviesList.length; i += columns) {
@@ -254,12 +260,13 @@ const handleMovieClick = (movie) => {
 
   return (
     <div className="main">
+      <div className="background"></div>
       <nav className="topmenu">
         <button onClick={() => {setSelectedType('All'); setSelectedGenre('All'); setShowBiblioteca(false)}}className={selectedType === 'All' && selectedGenre === 'All' && !showBiblioteca ? 'active' : '' }>Home</button>
         <button onClick={() => {setSelectedType('Movie'); setSelectedGenre('All'); setShowBiblioteca(false)}} className={selectedType === 'Movie' ? 'active' : ''}>Peliculas</button>
         <button onClick={() => {setSelectedType('Serie'); setSelectedGenre('All'); setShowBiblioteca(false)}} className={selectedType === 'Serie' ? 'active' : ''}>Series</button>
         <button onClick={() => {setSelectedType('All'); setSelectedGenre('All'); setShowBiblioteca(true)}}className={showBiblioteca ? 'active' : ''}>Biblioteca</button>
-        <input type="text" placeholder="Buscar..." value={searchMov} onChange={e => setSearch(e.target.value)} style={{marginLeft:16,padding:'4px 8px',borderRadius:4,border:'1px solid #ccc',minWidth:160}} />
+        <input type="text" placeholder="Buscar..." value={searchMov} onChange={e => setSearch(e.target.value)} className="search-input" />
         <nav className="menu">
           <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('All')}} className={selectedGenre === 'All' ? 'active' : ''}>Todas</button>
           <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Accion')}} className={selectedGenre === 'Accion' ? 'active' : ''}>Accion</button>
@@ -271,10 +278,14 @@ const handleMovieClick = (movie) => {
         </nav>
       </nav>
 
+    {/* ADMIN */}
+
     {role === 'admin' && <nav className="adminmenu">
       <h2>Controles Administrativos</h2>
       <button className="button2" onClick={() => setShowAddForm(true)}>Agregar Contenido</button>
     </nav>}
+
+    {/* FORMULARIO DE ANIADIR CONTENIDO */}
 
       {showAddForm && (
         <div className="form" style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.6)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:2000}}>
@@ -313,9 +324,10 @@ const handleMovieClick = (movie) => {
         </div>
       )}
 
+      {/* TABLA CONTENIDO */}
+      {/* PELICULAS */}
       {
-       rowsForMovies.length > 0 && <h2>Peliculas</h2>
-      }
+       rowsForMovies.length > 0 && <div className="content-section"><h2>Peliculas</h2>
       <table className="movies-table">
         <tbody>
           {rowsForMovies.map((row, rowIdx) => (
@@ -329,11 +341,12 @@ const handleMovieClick = (movie) => {
             </tr>
           ))}
         </tbody>
-      </table>
-
-      {
-       rowsForSeries.length > 0 && <h2>Series</h2>
+      </table></div>
       }
+
+      {/* SERIES */}
+      {
+       rowsForSeries.length > 0 && <div className="content-section"><h2>Series</h2>
       <table className="movies-table">
         <tbody>
           {rowsForSeries.map((row, rowIdx) => (
@@ -347,7 +360,8 @@ const handleMovieClick = (movie) => {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
+      }
     </div>
   );
 }

@@ -24,6 +24,8 @@ const Registro = () => {
 
         setLoading(true);
 
+        {/*  Interaccion BD */}
+
         try {
             const userCredential = await createUserWithEmailAndPassword(
                 auth,
@@ -42,19 +44,21 @@ const Registro = () => {
             });
 
             console.log("Registro exitoso. UID:", user.uid);
-            alert('Registro exitoso! Ya puedes iniciar sesión.');
+            alert('Usuario registrado con exito.');
             
             navigate('/'); 
+
+            {/* Errores de registro */}
 
         } catch (firebaseError) {
             console.error("Error de registro de Firebase:", firebaseError.code, firebaseError.message);
             
-            let errorMessage = 'Error desconocido al registrar. Intente más tarde.';
+            let errorMessage = 'Error desconocido de registro.';
             
             if (firebaseError.code === 'auth/weak-password') {
                 errorMessage = 'La contraseña debe tener al menos 6 caracteres.';
             } else if (firebaseError.code === 'auth/email-already-in-use') {
-                errorMessage = 'Este correo electrónico ya está registrado.';
+                errorMessage = 'Este correo electrónico ya existe';
             } else if (firebaseError.code === 'auth/invalid-email') {
                 errorMessage = 'El formato del correo electrónico es inválido.';
             }
@@ -83,7 +87,7 @@ const Registro = () => {
                     </label>
                     <label>
                         Contraseña:
-                        <input type="password" value={contrasena} onChange={e => setContrasena(e.target.value)} placeholder=" Ingrese una contraseña (mínimo 6 caracteres)" />
+                        <input type="password" value={contrasena} onChange={e => setContrasena(e.target.value)} placeholder=" Ingrese una contraseña" />
                     </label>
                     
                     <div className="registro-actions">

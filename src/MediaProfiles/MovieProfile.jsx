@@ -11,6 +11,11 @@ function MovieProfile() {
   const [media, setMedia] = useState(null);
   const [loading, setLoading] = useState(true);
   const [genres, setGenres] = useState([]);
+  const getImageSrc = (portada) => {
+    if (!portada || portada === "url") return DefaultCover;
+    if (portada.startsWith('http://') || portada.startsWith('https://')) return portada;
+    return new URL(`../assets/${portada}`, import.meta.url).href;
+  };
 
   // formulario
   const [showAddForm, setShowAddForm] = useState(false);
@@ -57,7 +62,7 @@ function MovieProfile() {
           setFaveDocId(null);
         }
       } catch (err) {
-        console.error('Error checking saved state:', err);
+        console.error('Error', err);
       }
     };
     checkSaved();
@@ -93,7 +98,7 @@ function MovieProfile() {
           console.error('No se encontr el producto');
         }
       } catch (err) {
-        console.error('Error al obtener datos:', err);
+        console.error('Error', err);
       } finally {
         setLoading(false);
       }
@@ -127,8 +132,11 @@ function MovieProfile() {
     fetchEpisodes();
   }, [id, selectedSeason, media]); 
 
+  {/* VIDEO PLAYER */}
+
   const openPlayer = (src) => {
-    setPlayerSrc(src || DefaultVideo);
+    const videoSrc = src && src !== "url" ? new URL(`../assets/${src}`, import.meta.url).href : DefaultVideo;
+    setPlayerSrc(videoSrc);
     setPlayerOpen(true);
   };
 
@@ -169,14 +177,16 @@ function MovieProfile() {
   const isSeries = media.tipo?.toLowerCase().includes("serie");
   const totalSeasons = Math.max(1, Number(media.numTemps) || 1);
 
+{/* PERFIL CONTENIDO */}
+
   return (
     <div
       className="movie-profile-container"
-      style={{ backgroundImage: `url(${media.portada || ''})` || DefaultCover }}
+      style={{ backgroundImage: `url(${getImageSrc(media.portada)})` }}
     >
       <div className="movie-profile-info-box">
         <div className="movie-profile-header">
-          <img src={media.portada} alt={`${media.nombre} portada`} className="movie-profile-thumb" />
+          <img src={getImageSrc(media.portada)} alt={`${media.nombre} portada`} className="movie-profile-thumb" />
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <h1 className="movie-profile-title">{media.nombre}</h1>
 
@@ -217,8 +227,10 @@ function MovieProfile() {
           {media.descripcion || 'Sin descripción disponible'}
         </p>
 
+        {/* BOTONES */}
+
         <div style={{ marginTop: 12 }}>
-          {!isSeries && (<button onClick={() => openPlayer(media.video)}>Play</button>)}
+          {!isSeries && (<button onClick={() => openPlayer(media.mov)}>Play</button>)}
           <button
             onClick={async () => {
               if (saving) return;
@@ -254,7 +266,9 @@ function MovieProfile() {
           </button>
         </div>
 
-        {role === 'admin' && <nav className="adminmenu">
+        {/* ADMIN */}
+
+        {role === 'admin' && isSeries && <nav className="adminmenu">
         <h2>Controles Administrativos</h2>
         <button className="button2" onClick={() => setShowAddForm(true)}>Agregar Contenido</button>
         </nav>}
@@ -291,8 +305,8 @@ function MovieProfile() {
               <div><label>Nombre</label><br/><input required value={newEpName} onChange={e=>setNewEpName(e.target.value)} /></div>
               <div><label>Descripción</label><br/><textarea value={newEpDesc} onChange={e=>setNewEpDesc(e.target.value)} /></div>
               <div><label>Duración (min)</label><br/><input value={newEpDuration} onChange={e=>setNewEpDuration(e.target.value)} placeholder="45" /></div>
-              <div><label>URL (mov)</label><br/><input value={newEpMov} onChange={e=>setNewEpMov(e.target.value)} placeholder="(opcional)" /></div>
-              <div><label>Temporada (numTemp)</label><br/><input type="number" min={1} value={newEpNumTemp} onChange={e=>setNewEpNumTemp(e.target.value)} /></div>
+              <div><label>URL</label><br/><input value={newEpMov} onChange={e=>setNewEpMov(e.target.value)} placeholder="(opcional)" /></div>
+              <div><label>Temporada</label><br/><input type="number" min={1} value={newEpNumTemp} onChange={e=>setNewEpNumTemp(e.target.value)} /></div>
               <div style={{marginTop:8}}>
                 <button type="submit" disabled={addingEp}>{addingEp ? 'Guardando...' : 'Agregar capítulo'}</button>
                 <button type="button" onClick={()=>setShowAddForm(false)} style={{marginLeft:8}}>Cancelar</button>
@@ -300,6 +314,8 @@ function MovieProfile() {
             </form>
           </div>
         )}
+
+        {/* MOSTRAR CAPITULOS DE SERIE */}
 
         {isSeries && (
           <div className="series-section" style={{ marginTop: 18 }}>
@@ -352,6 +368,8 @@ function MovieProfile() {
           </div>
         )}
       </div>
+
+      {/* ESTILO PLAYER */}
 
       {playerOpen && (
         <div
