@@ -71,28 +71,29 @@ const Registro = () => {
 
     return (
         <div className="registro-container">
+            <div className="background"></div>
             <div className="registro-form-card">
-                <h2>Registrarse</h2>
+                <h2>REGISTRARSE</h2>
                 
                 {error && <p className="error-message">{error}</p>}
                 
                 <form className="registro-form" onSubmit={handleRegistrarse}>
                     <label>
                         Mail:
-                        <input type="email" value={mail} onChange={e => setMail(e.target.value)} placeholder=" Ingrese su Mail" />
+                        <input type="email" value={mail} onChange={e => setMail(e.target.value)} placeholder="Ingrese su Mail" />
                     </label>
                     <label>
                         Usuario:
-                        <input type="text" value={usuario} onChange={e => setUsuario(e.target.value)} placeholder=" Ingrese un usuario" />
+                        <input type="text" value={usuario} onChange={e => setUsuario(e.target.value)} placeholder="Ingrese un usuario" />
                     </label>
                     <label>
                         Contraseña:
-                        <input type="password" value={contrasena} onChange={e => setContrasena(e.target.value)} placeholder=" Ingrese una contraseña" />
+                        <input type="password" value={contrasena} onChange={e => setContrasena(e.target.value)} placeholder="Ingrese una contraseña" />
                     </label>
                     
                     <div className="registro-actions">
                         <button type="submit" className="btn-registrar" disabled={loading}>
-                            {loading ? 'Registrando...' : 'Registrarse'}
+                            {loading ? 'Registrando...' : 'Crear Cuenta'}
                         </button>
                         <button type="button" className="btn-volver" onClick={() => navigate(-1)} disabled={loading}>
                             Volver

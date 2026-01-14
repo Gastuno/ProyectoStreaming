@@ -52,6 +52,13 @@ function Login() {
 
   return (
     <>
+      <div className="background"></div>
+      <div className="side-image">
+        <img src={loginImage} alt="Side" />
+      </div>
+      <div className="page-title">
+        <h1>Proyectostreaming</h1>
+      </div>
       <div className="login-container">
         <h2>INICIAR SESION</h2>
 
@@ -85,11 +92,7 @@ function Login() {
 
         </form>
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
-      </div>
-
-      <div className="side-image">
-        <img src={loginImage} alt="Side" />
+        {error && <p>{error}</p>}
       </div>
 
       

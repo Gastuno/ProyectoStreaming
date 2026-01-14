@@ -1,45 +1,45 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+.login-container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  background: rgba(26, 26, 46, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 2;
 }
 
-.login-container {
+.background {
   position: fixed;
   top: 0;
   left: 0;
-  width: 25vw;
+  width: 100vw;
   height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background-color: rgba(25, 25, 25, 0.704);
-  border-right: 3px solid rgb(255, 255, 255);
-  z-index: 1;
-  min-width: 250px;
-  border-radius: 12px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  z-index: -1;
+}
+
+.login-container h2 {
+  color: #a44fff;
+  margin-bottom: 30px;
+  font-size: 1.8em;
+  font-weight: 700;
+  text-align: center;
 }
 
 .side-image {
   position: fixed;
   top: 0;
-  right: 0;
+  left: 0;
   width: 100vw;
   height: 100vh;
-  -webkit-mask-image: linear-gradient(to bottom, white 0%, transparent 95%  );
-  mask-image: linear-gradient(to bottom,white 0%,transparent 95%);
   overflow: hidden;
   z-index: 0;
-}
-
-.side-image .side-text {
-  position: fixed;
-  bottom: 50vh;
-  right: 0;
-  color: rgb(255, 255, 255);
-  margin: 20px;
-  font: x-large;
-  z-index: 1;
 }
 
 .side-image img {
@@ -48,65 +48,94 @@
   object-fit: cover;
 }
 
-.side-image header {
-  position: fixed;
-  top: 0;
-  right: 0;
-}
-
 .button-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
+  margin-top: 20px;
 }
 
 .button-container button {
-  width: 15vh;
-  height: 5vh;
-  min-height: 50px;
-  min-width: 70px;
+  width: 100%;
+  max-width: 200px;
+  padding: 12px;
   font-size: 1.1rem;
-  border-radius: 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  transition: all 0.3s ease;
 }
-  .button-container button:nth-child(1) {
+
+.button-container button:nth-child(1) {
   background: linear-gradient(90deg, #a44fff, #7cc7ff);
-  transition: box-shadow 0.3s ease, background 0.3s ease, color 0.3s ease;
-  color: white;
-  }
+  color: #021018;
+  box-shadow: 0 4px 15px rgba(124, 199, 255, 0.3);
+}
 
 .button-container button:nth-child(1):hover {
-  box-shadow: 0 8px 40px rgba(170, 91, 255, 0.688);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(124, 199, 255, 0.4);
 }
 
 .button-container button:nth-child(2) {
-  background-color: rgba(0, 0, 255, 0);
-  color: white;
-  border: none;
-  height: 1vh;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .button-container button:nth-child(2):hover {
-  color: #7cc7ff
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
-
 
 .login-container input {
-  width: 20vh;
-  height: 3vh;
-  min-height: 20px;
-  min-width: 200px;
-  font-size: 1.2rem;
+  width: 100%;
+  padding: 12px;
   margin-bottom: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
 }
 
-.login-container button {
-  align-self: center;
-  flex-direction: column;
-  width: 15vh;
-  height: 5vh;
-  min-height: 50px;
-  min-width: 70px;
-  font-size: 1.1rem;
+.login-container input:focus {
+  border-color: #a44fff;
+  background: rgba(255, 255, 255, 0.15);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(164, 79, 255, 0.2);
+}
+
+.login-container input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.page-title {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 1;
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(90deg, #a44fff, #7cc7ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  pointer-events: none;
+  background-color: rgba(26, 26, 46, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 10px 20px;
   border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.page-title h1 {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
 }

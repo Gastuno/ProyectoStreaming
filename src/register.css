@@ -6,18 +6,30 @@
     padding: 20px;
 }
 
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    z-index: -1;
+}
+
 .registro-form-card {
-    background: #ffffff;
+    background: rgba(26, 26, 46, 0.95);
+    backdrop-filter: blur(20px);
     padding: 35px;
     border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     max-width: 450px;
     width: 100%;
     text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .registro-form-card h2 {
-    color: #004d99;
+    color: #a44fff;
     margin-bottom: 30px;
     font-size: 1.8em;
     font-weight: 700;
@@ -28,16 +40,30 @@
     text-align: left;
     margin-bottom: 15px;
     font-weight: 600;
-    color: #333;
+    color: #ffffff;
 }
 
 .registro-form input {
     width: 100%;
     padding: 12px;
     margin-top: 5px;
-    border: 1px solid #ccc;
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 8px;
     box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    transition: all 0.3s ease;
+}
+
+.registro-form input:focus {
+    border-color: #a44fff;
+    background: rgba(255, 255, 255, 0.15);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(164, 79, 255, 0.2);
+}
+
+.registro-form input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .registro-actions {
@@ -55,40 +81,43 @@
     cursor: pointer;
     font-size: 1em;
     font-weight: 700;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
 }
 
 .btn-registrar {
     background: linear-gradient(90deg, #a44fff, #7cc7ff);
-    transition: box-shadow 0.3s ease, background 0.3s ease, color 0.3s ease;
-    color: white;
+    color: #021018;
+    box-shadow: 0 4px 15px rgba(124, 199, 255, 0.3);
 }
 
 .btn-registrar:hover {
-    color: white;
-    box-shadow: 0 8px 40px rgba(170, 91, 255, 0.688);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(124, 199, 255, 0.4);
 }
 
-.btn-registrar.active {
-    background: linear-gradient(90deg, #a44fff, #7cc7ff);
+.btn-registrar:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .btn-volver {
-    background-color: #6c757d00;
-    color: rgb(0, 0, 0);
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .btn-volver:hover {
-    background-color: #6c757d00;
-    color: #7cc7ff;
-    
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .error-message {
     padding: 10px;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    color: #721c24;
+    background-color: rgba(248, 215, 218, 0.1);
+    border: 1px solid rgba(245, 198, 203, 0.3);
+    color: #f5c6cb;
     border-radius: 5px;
     margin-bottom: 15px;
     font-weight: 500;

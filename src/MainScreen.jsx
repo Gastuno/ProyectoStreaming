@@ -1,9 +1,9 @@
-import "./MainScreen.css";
-import Cover from './assets/placeholder.jpg';
+import './MainScreen.css';
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
-import { addDoc, collection, query, where, getDocs } from "firebase/firestore";
-import { db } from "./firebaseconfig";
+import { addDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from './firebaseconfig';
+import { urlimagen } from './urlimagen';
 
 function MainScreen() {
   const navigate = useNavigate();
@@ -12,12 +12,6 @@ function MainScreen() {
   const [movies, setMovies] = useState([]);
   const [uid, setUserId] = useState(null); 
   const [faveIds, setFaveIds] = useState([]);
-
-  const getImageSrc = (portada) => {
-    if (!portada || portada === "url") return Cover;
-    if (portada.startsWith('http://') || portada.startsWith('https://')) return portada;
-    return new URL(`./assets/${portada}`, import.meta.url).href;
-  };
 
 //interaccion bd
 useEffect(() => {
@@ -77,7 +71,7 @@ useEffect(() => {
         return {
           id: prod.id,
           name: prod.nombre,
-          cover: getImageSrc(prod.portada),
+          cover: urlimagen(prod.portada),
           type: prod.tipo === "Pelicula" ? "Movie" : "Serie",
           duration: prod["duracion-m"] || "",
           stars: prod.puntaje || 0,
@@ -260,6 +254,7 @@ const handleMovieClick = (movie) => {
 
   return (
     <div className="main">
+      {loading && <p>Cargando...</p>}
       <div className="background"></div>
       <nav className="topmenu">
         <button onClick={() => {setSelectedType('All'); setSelectedGenre('All'); setShowBiblioteca(false)}}className={selectedType === 'All' && selectedGenre === 'All' && !showBiblioteca ? 'active' : '' }>Home</button>
