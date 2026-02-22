@@ -1,17 +1,35 @@
 import './MainScreen.css';
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
-import { addDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from './firebaseconfig';
+import { addDoc, collection, query, where, getDocs, doc, setDoc } from 'firebase/firestore';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from './firebaseconfig';
 import { urlimagen } from './urlimagen';
 
 function MainScreen() {
   const navigate = useNavigate();
   const location = useLocation();
+  // All state declarations must be at the top
   const [loading, setLoading] = useState(true);
   const [movies, setMovies] = useState([]);
   const [uid, setUserId] = useState(null); 
   const [faveIds, setFaveIds] = useState([]);
+  const [role, setRole] = useState('user');
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newGenres, setNewGenres] = useState([]);
+  const [newType, setNewType] = useState('Movie');
+  const [newDuration, setNewDuration] = useState('');
+  const [newDescription, setNewDescription] = useState('');
+  const [newDirector, setNewDirector] = useState('');
+  const [newUrl, setNewUrl] = useState('');
+  const [newChaptersText, setNewChaptersText] = useState('');
+  const [procesando, setProcesando] = useState(false);
+  const [selectedGenre, setSelectedGenre] = useState('All');
+  const [selectedType, setSelectedType] = useState('All');
+  const [showBiblioteca, setShowBiblioteca] = useState(false);
+  const [searchMov, setSearch] = useState('');
+  const [genresList, setGenresList] = useState([]);
 
 //interaccion bd
 useEffect(() => {
@@ -20,6 +38,13 @@ useEffect(() => {
           setUserId(sid);
       }
   }, []);
+
+useEffect(() => {
+  const fromState = location.state?.role;
+  const stored = sessionStorage.getItem('role');
+  if (fromState) setRole(fromState);
+  else if (stored) setRole(stored);
+}, [location.state]);
 
 useEffect(() => {
     if (!uid) { 
@@ -96,25 +121,6 @@ useEffect(() => {
   fetchMovies();
 }, [uid]);
 
-
-  const [role, setRole] = useState('user');
-  useEffect(() => {
-    const fromState = location.state?.role;
-    const stored = sessionStorage.getItem('role');
-    if (fromState) setRole(fromState);
-    else if (stored) setRole(stored);
-  }, [location.state]);
-
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newTitle, setNewTitle] = useState('');
-  const [newGenres, setNewGenres] = useState([]);
-  const [newType, setNewType] = useState('Movie');
-  const [newDuration, setNewDuration] = useState('');
-  const [newDescription, setNewDescription] = useState('');
-  const [newDirector, setNewDirector] = useState('');
-  const [newUrl, setNewUrl] = useState('');
-  const [newChaptersText, setNewChaptersText] = useState('');
-  const [procesando, setProcesando] = useState(false);
 
   const resetForm = () => {
     setNewTitle(''); setNewGenres([]); setNewType('Movie'); setNewDuration(''); setNewDescription(''); setNewChaptersText('');
@@ -195,10 +201,6 @@ useEffect(() => {
   }
   };
 
-  const [selectedGenre, setSelectedGenre] = useState('All');
-  const [selectedType, setSelectedType] = useState('All');
-  const [showBiblioteca, setShowBiblioteca] = useState(false);
-  const [searchMov, setSearch] = useState('')
 
 //logica filtros
 
@@ -217,7 +219,6 @@ useEffect(() => {
     filteredMovies = filteredMovies.filter(movie => movie.name.toLowerCase().includes(searchLower));
   }
 
-  const [genresList, setGenresList] = useState([]);
   const columns = 7;
   const moviesList = filteredMovies.filter(m => m.type === 'Movie');
   const seriesList = filteredMovies.filter(m => m.type === 'Serie');
@@ -260,7 +261,6 @@ const handleMovieClick = (movie) => {
         <button onClick={() => {setSelectedType('All'); setSelectedGenre('All'); setShowBiblioteca(false)}}className={selectedType === 'All' && selectedGenre === 'All' && !showBiblioteca ? 'active' : '' }>Home</button>
         <button onClick={() => {setSelectedType('Movie'); setSelectedGenre('All'); setShowBiblioteca(false)}} className={selectedType === 'Movie' ? 'active' : ''}>Peliculas</button>
         <button onClick={() => {setSelectedType('Serie'); setSelectedGenre('All'); setShowBiblioteca(false)}} className={selectedType === 'Serie' ? 'active' : ''}>Series</button>
-        <button onClick={() => {setSelectedType('All'); setSelectedGenre('All'); setShowBiblioteca(true)}}className={showBiblioteca ? 'active' : ''}>Biblioteca</button>
         <input type="text" placeholder="Buscar..." value={searchMov} onChange={e => setSearch(e.target.value)} className="search-input" />
         <nav className="menu">
           <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('All')}} className={selectedGenre === 'All' ? 'active' : ''}>Todas</button>
@@ -271,6 +271,11 @@ const handleMovieClick = (movie) => {
           <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Sci-Fi')}} className={selectedGenre === 'Sci-Fi' ? 'active' : ''}>Sci-Fi</button>
           <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Terror')}} className={selectedGenre === 'Terror' ? 'active' : ''}>Terror</button>
         </nav>
+      </nav>
+
+      <nav className="biblioteca-menu">
+        <button onClick={() => {setSelectedType('All'); setSelectedGenre('All'); setShowBiblioteca(true)}}className={showBiblioteca ? 'active' : ''}>Biblioteca</button>
+        <button onClick={() => {sessionStorage.clear(); navigate('/');}}>Logout</button>
       </nav>
 
     {/* ADMIN */}

@@ -83,10 +83,6 @@ const Registro = () => {
                         <input type="email" value={mail} onChange={e => setMail(e.target.value)} placeholder="Ingrese su Mail" />
                     </label>
                     <label>
-                        Usuario:
-                        <input type="text" value={usuario} onChange={e => setUsuario(e.target.value)} placeholder="Ingrese un usuario" />
-                    </label>
-                    <label>
                         Contraseña:
                         <input type="password" value={contrasena} onChange={e => setContrasena(e.target.value)} placeholder="Ingrese una contraseña" />
                     </label>

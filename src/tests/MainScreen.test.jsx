@@ -25,7 +25,8 @@ jest.mock('../urlimagen', () => ({
 
 //BD
 jest.mock('../firebaseconfig', () => ({
-  db: {}
+  db: {},
+  auth: {}
 }));
 
 jest.mock('firebase/firestore', () => ({
@@ -33,7 +34,13 @@ jest.mock('firebase/firestore', () => ({
   query: jest.fn(),
   where: jest.fn(),
   getDocs: jest.fn(),
-  addDoc: jest.fn()
+  addDoc: jest.fn(),
+  doc: jest.fn(),
+  setDoc: jest.fn()
+}));
+
+jest.mock('firebase/auth', () => ({
+  createUserWithEmailAndPassword: jest.fn()
 }));
 
 //ROUTER Y POS
@@ -61,6 +68,10 @@ Object.defineProperty(window, 'sessionStorage', {
 describe('MainScreen Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // collection mock returns an object with the name for easier assertion
+    const { collection } = require('firebase/firestore');
+    collection.mockImplementation((db, name) => ({ __collectionName: name }));
+    window.confirm = jest.fn().mockReturnValue(false);
   });
 
 ///////////////////////////////////////////////////////
@@ -68,10 +79,14 @@ describe('MainScreen Component', () => {
 test('Renderizar movies correctamente', async () => {
   const { getDocs } = require('firebase/firestore');
 
+  // first call is the emptiness check
   getDocs
+    .mockResolvedValueOnce({ docs: [] })
+    // faves
     .mockResolvedValueOnce({
       docs: [{ data: () => ({ idFave: 'movie1' }) }]
     })
+    // productos
     .mockResolvedValueOnce({
       docs: [
         {
@@ -85,7 +100,9 @@ test('Renderizar movies correctamente', async () => {
         }
       ]
     })
+    // generos
     .mockResolvedValueOnce({ docs: [] })
+    // generos links
     .mockResolvedValueOnce({ docs: [] });
 
   render(
@@ -94,7 +111,7 @@ test('Renderizar movies correctamente', async () => {
     </BrowserRouter>
   );
 
-expect(await screen.findByText('Test Movie')).toBeInTheDocument();
+  expect(await screen.findByText('Test Movie')).toBeInTheDocument();
 });
 
 ///////////////////////////////////////////////////////
@@ -112,5 +129,62 @@ test('Rol de usuario', () => {
 
   //NO ADMIN
   expect(mockLocation.state.role).toBe('user');
+});
+
+///////////////////////////////////////////////////////
+
+test('Debes confirmar si base de datos vacía y se ejecuta poblado', async () => {
+  const { getDocs, addDoc } = require('firebase/firestore');
+  const { createUserWithEmailAndPassword } = require('firebase/auth');
+
+  // initial emptiness check returns empty
+  getDocs
+    .mockResolvedValueOnce({ docs: [] })
+    // subsequent fetches: faves, productos, generos, generos links
+    .mockResolvedValueOnce({ docs: [] })
+    .mockResolvedValueOnce({ docs: [] })
+    .mockResolvedValueOnce({ docs: [] })
+    .mockResolvedValueOnce({ docs: [] });
+
+  window.confirm = jest.fn().mockReturnValue(true);
+  addDoc.mockResolvedValue({ id: 'dummy' });
+  createUserWithEmailAndPassword.mockResolvedValue({ user: { uid: 'u1' } });
+
+  render(
+    <BrowserRouter>
+      <MainScreen />
+    </BrowserRouter>
+  );
+
+  await waitFor(() => expect(window.confirm).toHaveBeenCalled());
+  // ensure we attempted to create genres (setDoc called for each id)
+  const { doc, setDoc } = require('firebase/firestore');
+  expect(doc).toHaveBeenCalledWith(expect.anything(), "Genero", "0");
+  expect(setDoc).toHaveBeenCalled();
+  // at least one addDoc should target capitulo and usuariofaves via returned collection name
+  const calledCollections = addDoc.mock.calls.map(c => c[0]?.__collectionName).filter(Boolean);
+  expect(calledCollections).toEqual(expect.arrayContaining(["Capitulo", "UsuarioFaves"]));
+  expect(createUserWithEmailAndPassword).toHaveBeenCalledTimes(2);
+});
+
+///////////////////////////////////////////////////////
+
+test('No pide confirm si coleccion no está vacía', async () => {
+  const { getDocs } = require('firebase/firestore');
+  getDocs.mockResolvedValueOnce({ docs: [{ id:'x', data:()=>({}) }] });
+  // the rest of calls should still be stubbed
+  getDocs
+    .mockResolvedValueOnce({ docs: [] })
+    .mockResolvedValueOnce({ docs: [] })
+    .mockResolvedValueOnce({ docs: [] })
+    .mockResolvedValueOnce({ docs: [] });
+
+  render(
+    <BrowserRouter>
+      <MainScreen />
+    </BrowserRouter>
+  );
+
+  expect(window.confirm).not.toHaveBeenCalled();
 });
 });
