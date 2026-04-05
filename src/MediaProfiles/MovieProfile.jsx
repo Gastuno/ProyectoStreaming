@@ -302,11 +302,11 @@ function MovieProfile() {
               }
             }} style={{background:'#222',padding:20,borderRadius:8,minWidth:360,color:'#fff'}}>
               <h3>Agregar nuevo capítulo</h3>
-              <div><label>Nombre</label><br/><input required value={newEpName} onChange={e=>setNewEpName(e.target.value)} /></div>
-              <div><label>Descripción</label><br/><textarea value={newEpDesc} onChange={e=>setNewEpDesc(e.target.value)} /></div>
-              <div><label>Duración (min)</label><br/><input value={newEpDuration} onChange={e=>setNewEpDuration(e.target.value)} placeholder="45" /></div>
-              <div><label>URL</label><br/><input value={newEpMov} onChange={e=>setNewEpMov(e.target.value)} placeholder="(opcional)" /></div>
-              <div><label>Temporada</label><br/><input type="number" min={1} value={newEpNumTemp} onChange={e=>setNewEpNumTemp(e.target.value)} /></div>
+              <div><label>Nombre</label><br/><input required value={newEpName} maxLength={30} onChange={e=>setNewEpName(e.target.value)} /></div>
+              <div><label>Descripción</label><br/><textarea value={newEpDesc} maxLength={500} onChange={e=>setNewEpDesc(e.target.value)} /></div>
+              <div><label>Duración (min)</label><br/><input value={newEpDuration} maxLength={6} type="number" onChange={e=>setNewEpDuration(e.target.value)} placeholder="45" /></div>
+              <div><label>URL</label><br/><input value={newEpMov} maxLength={200} onChange={e=>setNewEpMov(e.target.value)} placeholder="(opcional)" /></div>
+              <div><label>Temporada</label><br/><input type="number" maxLength={5} min={1} value={newEpNumTemp} onChange={e=>setNewEpNumTemp(e.target.value)} /></div>
               <div style={{marginTop:8}}>
                 <button type="submit" disabled={addingEp}>{addingEp ? 'Guardando...' : 'Agregar capítulo'}</button>
                 <button type="button" onClick={()=>setShowAddForm(false)} style={{marginLeft:8}}>Cancelar</button>

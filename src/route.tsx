@@ -3,6 +3,7 @@ import Login from './Login.jsx';
 import MainScreen from './MainScreen.jsx';
 import MovieProfile from './MediaProfiles/MovieProfile.jsx';
 import Register from './register.jsx';
+import UserIndex from './UserIndex.jsx';
 
 const router = createBrowserRouter([
   {
@@ -20,6 +21,10 @@ const router = createBrowserRouter([
   {
     path: '/movie/:id',
     element: <MovieProfile />,
+  },
+  {
+    path: '/userindex',
+    element: <UserIndex />,
   },
 ]);
 

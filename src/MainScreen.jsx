@@ -9,7 +9,6 @@ import { urlimagen } from './urlimagen';
 function MainScreen() {
   const navigate = useNavigate();
   const location = useLocation();
-  // All state declarations must be at the top
   const [loading, setLoading] = useState(true);
   const [movies, setMovies] = useState([]);
   const [uid, setUserId] = useState(null); 
@@ -283,6 +282,7 @@ const handleMovieClick = (movie) => {
     {role === 'admin' && <nav className="adminmenu">
       <h2>Controles Administrativos</h2>
       <button className="button2" onClick={() => setShowAddForm(true)}>Agregar Contenido</button>
+      <button className="button2" onClick={() => navigate('/userindex')}>Usuarios</button>
     </nav>}
 
     {/* FORMULARIO DE ANIADIR CONTENIDO */}
@@ -291,7 +291,7 @@ const handleMovieClick = (movie) => {
         <div className="form" style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.6)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:2000}}>
           <form onSubmit={handleAddSubmit} style={{background:'#222',padding:20,borderRadius:8,minWidth:320,color:'#fff'}}>
             <h3>Agregar nuevo elemento</h3>
-            <div><label>Título</label><br/><input value={newTitle} onChange={e=>setNewTitle(e.target.value)} required /></div>
+            <div><label>Título</label><br/><input value={newTitle} maxLength={30} onChange={e=>setNewTitle(e.target.value)} required /></div>
             <div><label>Tipo</label><br/>
               <select value={newType} onChange={e=>setNewType(e.target.value)}>
                 <option value="Movie">Pelicula</option>
@@ -313,9 +313,9 @@ const handleMovieClick = (movie) => {
               </label>
             ))}
             </div>
-            {newType === 'Movie' && <div><label>Duración(minutos)</label><br/><input value={newDuration} onChange={e=>setNewDuration(e.target.value)} placeholder="120" /></div>}
+            {newType === 'Movie' && <div><label>Duración(minutos)</label><br/><input value={newDuration} maxLength={6} type="number" onChange={e=>setNewDuration(e.target.value)} placeholder="120" /></div>}
             <div><label>Descripción</label><br/><textarea value={newDescription} onChange={e=>setNewDescription(e.target.value)} /></div>
-            <div><label>Url Portada</label><br/><textarea value={newUrl} onChange={e=>setNewUrl(e.target.value)} /></div>
+            <div><label>Url Portada</label><br/><textarea value={newUrl} type="image" onChange={e=>setNewUrl(e.target.value)} /></div>
             <div style={{marginTop:8}}>
             <button type="submit" disabled={procesando}> {procesando ? 'Guardando...' : 'Agregar'}</button>
             <button type="button" onClick={()=>{setShowAddForm(false); resetForm();}} style={{marginLeft:8}}>Cancelar</button>
