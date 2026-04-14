@@ -1,7 +1,7 @@
 import './MainScreen.css';
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { auth, db } from './firebaseconfig';
 
 function UserIndex() {
@@ -52,6 +52,17 @@ useEffect(() => {
   fetchUsers();
 }, [role]);
 
+//Funcion para actualizar el nivel del usuario llamada en el dropdown
+
+  const updateLevel = async (Id, newLevel) => {
+    try {
+      const userRef = doc(db, "Usuario", Id);
+      await updateDoc(userRef, { nivel: newLevel });
+      setUsers(users => users.map(u => u.id === Id ? { ...u, nivel: newLevel } : u));
+    } catch (error) {
+      console.error("Error", error);
+    }
+  };
 
   return (
     <div className="main">
@@ -65,16 +76,26 @@ useEffect(() => {
             <thead>
               <tr>
                 <th>Editar</th>
+                <th>Id</th>
                 <th>Email</th>
-                <th>Contraseña</th>
+                <th>Registro</th>
+                <th>Nivel</th>
               </tr>
             </thead>
             <tbody>
+              
               {users.map(user => (
                 <tr key={user.id}>
-                  <td><button>Editar</button></td>
+                  <td>{user.id}</td>
                   <td>{user.email}</td>
-                  <td>{user.password}</td>
+                  <td>{user.fechaRegistro.toDate().toLocaleString()}</td>
+                  <td>
+                    <select
+                    value={user.nivel} onChange={(e) => updateLevel(user.id, Number(e.target.value))}>
+                      <option value={0}>usuario</option>
+                      <option value={1}>admin</option>
+                      </select>
+                    </td>
                 </tr>
               ))}
             </tbody>

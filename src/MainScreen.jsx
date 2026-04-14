@@ -24,6 +24,7 @@ function MainScreen() {
   const [newUrl, setNewUrl] = useState('');
   const [newChaptersText, setNewChaptersText] = useState('');
   const [procesando, setProcesando] = useState(false);
+  const [genreError, setGenreError] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('All');
   const [selectedType, setSelectedType] = useState('All');
   const [showBiblioteca, setShowBiblioteca] = useState(false);
@@ -122,7 +123,7 @@ useEffect(() => {
 
 
   const resetForm = () => {
-    setNewTitle(''); setNewGenres([]); setNewType('Movie'); setNewDuration(''); setNewDescription(''); setNewChaptersText('');
+    setNewTitle(''); setNewGenres([]); setNewType('Movie'); setNewDuration(''); setNewDescription(''); setNewChaptersText(''); setGenreError('');
   };
 
   const handleAddSubmit = async (e) => {
@@ -140,6 +141,12 @@ useEffect(() => {
       inputGenres = newGenres.map(g => String(g).trim()).filter(Boolean);
     } else {
       inputGenres = String(newGenres).split(',').map(g => g.trim()).filter(Boolean);
+    }
+
+    if (inputGenres.length === 0) {
+      setGenreError('Seleccione al menos un género.');
+      setProcesando(false);
+      return;
     }
 
     const productoRef = await addDoc(collection(db, "Producto"), {
@@ -300,20 +307,26 @@ const handleMovieClick = (movie) => {
             </div>
             <div><label>Géneros</label><br/>
             {genresList.map(g => (
-              <label key={g}>
+              <label key={g} style={{display:'block'}}>
                 <input
                   type="checkbox"
                   value={g}
                   checked={newGenres.includes(g)}
                   onChange={e => {
-                    if (e.target.checked) {setNewGenres([...newGenres, g]);} else {setNewGenres(newGenres.filter(x => x !== g));}
+                    if (e.target.checked) {
+                      setNewGenres([...newGenres, g]);
+                      if (genreError) setGenreError('');
+                    } else {
+                      setNewGenres(newGenres.filter(x => x !== g));
+                    }
                   }}
                 />
                 {g}
               </label>
             ))}
+            {genreError && <div style={{color:'tomato', marginTop:4}}>{genreError}</div>}
             </div>
-            {newType === 'Movie' && <div><label>Duración(minutos)</label><br/><input value={newDuration} maxLength={6} type="number" onChange={e=>setNewDuration(e.target.value)} placeholder="120" /></div>}
+            {newType === 'Movie' && <div><label>Duración(minutos)</label><br/><input value={newDuration} maxLength={6} min={0} type="number" onChange={e=>setNewDuration(e.target.value)} placeholder="120" /></div>}
             <div><label>Descripción</label><br/><textarea value={newDescription} onChange={e=>setNewDescription(e.target.value)} /></div>
             <div><label>Url Portada</label><br/><textarea value={newUrl} type="image" onChange={e=>setNewUrl(e.target.value)} /></div>
             <div style={{marginTop:8}}>
