@@ -18,6 +18,8 @@ function Login() {
   const [cargando, setCargando] = useState(false);
   // animacion cargando
   const [puntos, setPuntos] = useState("");
+  // modal de confirmación
+  const [showPopulate, setShowPopulate] = useState(false);
 
   // popup popular
   useEffect(() => {
@@ -28,14 +30,7 @@ function Login() {
       try {
         const prodSnap = await getDocs(collection(db, "Producto"));
         if (prodSnap.empty) {
-          const confirmed = window.confirm(
-            "Inicializar base de datos?"
-          );
-          if (confirmed) {
-            setCargando(true);
-            await populateDatabase();
-            setCargando(false);
-          }
+          setShowPopulate(true);
         }
       } catch (err) {
         console.error("Error", err);
@@ -218,6 +213,29 @@ if (cargando) {
       <div className="page-title">
         <h1>Proyectostreaming</h1>
       </div>
+
+      {showPopulate && (
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.6)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:3000}}>
+          <div style={{background:'#222',padding:30,borderRadius:8,color:'#fff',textAlign:'center',minWidth:300}}>
+            <h3>¿Inicializar base de datos?</h3>
+            <p style={{marginBottom:20}}>Esto creará contenido de ejemplo y usuarios para pruebas.</p>
+            <div style={{display:'flex',gap:10,justifyContent:'center'}}>
+              <button onClick={async () => {
+                setShowPopulate(false);
+                setCargando(true);
+                await populateDatabase();
+                setCargando(false);
+              }} style={{padding:'10px 20px', background:'#4CAF50', color:'white', border:'none', borderRadius:'4px', cursor:'pointer'}}>
+                Sí
+              </button>
+              <button onClick={() => setShowPopulate(false)} style={{padding:'10px 20px', background:'#f44336', color:'white', border:'none', borderRadius:'4px', cursor:'pointer'}}>
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="login-container">
         <h2>INICIAR SESION</h2>
 

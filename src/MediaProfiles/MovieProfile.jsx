@@ -311,7 +311,7 @@ function MovieProfile() {
               <h3>Agregar nuevo capítulo</h3>
               <div><label>Nombre</label><br/><input required value={newEpName} maxLength={30} onChange={e=>setNewEpName(e.target.value)} /></div>
               <div><label>Descripción</label><br/><textarea value={newEpDesc} maxLength={500} onChange={e=>setNewEpDesc(e.target.value)} /></div>
-              <div><label>Duración (min)</label><br/><input value={newEpDuration} maxLength={6} min={0} type="number" onChange={e=>setNewEpDuration(e.target.value)} placeholder="45" /></div>
+              <div><label>Duración (min)</label><br/><input value={newEpDuration} max={999} min={0} type="number" onChange={e=>setNewEpDuration(e.target.value)} placeholder="45" /></div>
               <div><label>URL</label><br/><input value={newEpMov} maxLength={200} onChange={e=>setNewEpMov(e.target.value)} placeholder="(opcional)" /></div>
               <div><label>Temporada</label><br/><input type="number" maxLength={5} min={1} value={newEpNumTemp} onChange={e=>setNewEpNumTemp(e.target.value)} /></div>
               <div style={{marginTop:8}}>

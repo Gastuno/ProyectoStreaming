@@ -79,7 +79,6 @@ useEffect(() => {
           <table className="users-table">
             <thead>
               <tr>
-                <th>Editar</th>
                 <th>Id</th>
                 <th>Email</th>
                 <th>Registro</th>

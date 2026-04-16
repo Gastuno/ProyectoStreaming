@@ -15,6 +15,7 @@ function MainScreen() {
   const [faveIds, setFaveIds] = useState([]);
   const [role, setRole] = useState('user');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showAddFormGender, setShowAddFormGender] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newGenres, setNewGenres] = useState([]);
   const [newType, setNewType] = useState('Movie');
@@ -24,12 +25,15 @@ function MainScreen() {
   const [newUrl, setNewUrl] = useState('');
   const [newChaptersText, setNewChaptersText] = useState('');
   const [procesando, setProcesando] = useState(false);
+  const [genreSubmitting, setGenreSubmitting] = useState(false);
   const [genreError, setGenreError] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('All');
   const [selectedType, setSelectedType] = useState('All');
   const [showBiblioteca, setShowBiblioteca] = useState(false);
   const [searchMov, setSearch] = useState('');
   const [genresList, setGenresList] = useState([]);
+  const [msjError, setMsjError] = useState('');
+  const [newGenre, setNewGenre] = useState('');
 
 //interaccion bd
 useEffect(() => {
@@ -112,7 +116,17 @@ useEffect(() => {
       setMovies(adapted);
 
     } catch (error) {
-      console.error("Error load ing movies", error);
+      console.error("Error cargando películas:", error);
+      
+      if (error.code === 'permission-denied') {
+        setMsjError('Permiso denegado');
+      } else if (error.code === 'unauthenticated') {
+        setMsjError('Error de autenticación, por favor intente denuevo');
+      } else if (error.code === 'unavailable') {
+        setMsjError('Contenido no disponible');
+      } else {
+        setMsjError('Error al cargar el contenido. por favor intente denuevo');
+      }
     } finally {
       setLoading(false);
     }
@@ -123,7 +137,7 @@ useEffect(() => {
 
 
   const resetForm = () => {
-    setNewTitle(''); setNewGenres([]); setNewType('Movie'); setNewDuration(''); setNewDescription(''); setNewChaptersText(''); setGenreError('');
+    setNewTitle(''); setNewGenres([]); setNewType('Movie'); setNewDuration(''); setNewDescription(''); setNewChaptersText(''); setGenreError(''); setMsjError('');
   };
 
   const handleAddSubmit = async (e) => {
@@ -201,8 +215,21 @@ useEffect(() => {
     window.location.reload();
 
   } catch (error) {
-    console.error("Error guardando contenido.", error);
-    alert("Error guardando contenido.");
+    console.error("Error guardando contenido:", error);
+    
+    let mensajeError = 'Error guardando contenido';
+    
+    if (error.code === 'permission-denied') {
+      mensajeError = 'Permiso denegado';
+    } else if (error.code === 'unauthenticated') {
+      mensajeError = 'Error de autenticación, por favor intente denuevo';
+    } else if (error.code === 'unavailable') {
+      mensajeError = 'Contenido no disponible';
+    } else if (error.code === 'invalid-argument') {
+      mensajeError = 'Argumento invalido en el formulario';
+    }
+    
+    alert(mensajeError);
     setProcesando(false);
   }
   };
@@ -258,10 +285,12 @@ const handleMovieClick = (movie) => {
 };
 
   // Menus de arriba
+  const availableGenres = ['All', ...Array.from(new Set(genresList.filter(Boolean)))];
 
   return (
     <div className="main">
       {loading && <p>Cargando...</p>}
+      {msjError && <div style={{position:'fixed', top:20, left:20, background:'#d32f2f', color:'white', padding:'12px 16px', borderRadius:'4px', zIndex:3000}}>{errorMsg}</div>}
       <div className="background"></div>
       <nav className="topmenu">
         <button onClick={() => {setSelectedType('All'); setSelectedGenre('All'); setShowBiblioteca(false)}}className={selectedType === 'All' && selectedGenre === 'All' && !showBiblioteca ? 'active' : '' }>Home</button>
@@ -269,13 +298,15 @@ const handleMovieClick = (movie) => {
         <button onClick={() => {setSelectedType('Serie'); setSelectedGenre('All'); setShowBiblioteca(false)}} className={selectedType === 'Serie' ? 'active' : ''}>Series</button>
         <input type="text" placeholder="Buscar..." value={searchMov} onChange={e => setSearch(e.target.value)} className="search-input" />
         <nav className="menu">
-          <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('All')}} className={selectedGenre === 'All' ? 'active' : ''}>Todas</button>
-          <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Accion')}} className={selectedGenre === 'Accion' ? 'active' : ''}>Accion</button>
-          <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Romance')}} className={selectedGenre === 'Romance' ? 'active' : ''}>Romance</button>
-          <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Comedia')}} className={selectedGenre === 'Comedia' ? 'active' : ''}>Comedia</button>
-          <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Drama')}} className={selectedGenre === 'Drama' ? 'active' : ''}>Drama</button>
-          <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Sci-Fi')}} className={selectedGenre === 'Sci-Fi' ? 'active' : ''}>Sci-Fi</button>
-          <button onClick={() => {setShowBiblioteca(false); setSelectedGenre('Terror')}} className={selectedGenre === 'Terror' ? 'active' : ''}>Terror</button>
+          {availableGenres.map((genre) => (
+            <button
+              key={genre}
+              onClick={() => {setShowBiblioteca(false); setSelectedGenre(genre)}}
+              className={selectedGenre === genre ? 'active' : ''}
+            >
+              {genre}
+            </button>
+          ))}
         </nav>
       </nav>
 
@@ -289,8 +320,43 @@ const handleMovieClick = (movie) => {
     {role === 'admin' && <nav className="adminmenu">
       <h2>Controles Administrativos</h2>
       <button className="button2" onClick={() => setShowAddForm(true)}>Agregar Contenido</button>
+      <button className="button2" onClick={() => setShowAddFormGender(true)}>Agregar Genero</button>
       <button className="button2" onClick={() => navigate('/userindex')}>Usuarios</button>
     </nav>}
+
+
+    {/* FORMULARIO DE ANIADIR GENERO */}
+    {showAddFormGender && (
+      <div className="form" style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.6)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:2000}}>
+        <form onSubmit={async (e) => {
+          e.preventDefault();
+          if (genreSubmitting) return;
+          setGenreSubmitting(true);
+
+          const formData = new FormData(e.target);
+          const nombre = formData.get('nombre');
+
+          try {
+            const generoSnap = await getDocs(collection(db, "Genero"));
+            const nextId = String(generoSnap.size);
+            await setDoc(doc(db, "Genero", nextId), { nombre });
+            setShowAddFormGender(false);
+            setNewGenre('');
+          } catch (error) {
+            console.error("Error al agregar género:", error);
+          } finally {
+            setGenreSubmitting(false);
+          }
+        }} style={{background:'#222',padding:20,borderRadius:8,minWidth:320,color:'#fff'}}>
+          <h3>Agregar nuevo género</h3>
+          <div><label>Nombre</label><br/><input type="text" name="nombre" value={newGenre} onChange={e => setNewGenre(e.target.value)} required /></div>
+          <div style={{marginTop:8}}>
+            <button type="submit" disabled={genreSubmitting}> {genreSubmitting ? 'Guardando...' : 'Agregar'}</button>
+            <button type="button" onClick={()=>{setShowAddFormGender(false);}} style={{marginLeft:8}}>Cancelar</button>
+          </div>
+        </form>
+      </div>
+    )}
 
     {/* FORMULARIO DE ANIADIR CONTENIDO */}
 
@@ -326,7 +392,7 @@ const handleMovieClick = (movie) => {
             ))}
             {genreError && <div style={{color:'tomato', marginTop:4}}>{genreError}</div>}
             </div>
-            {newType === 'Movie' && <div><label>Duración(minutos)</label><br/><input value={newDuration} maxLength={6} min={0} type="number" onChange={e=>setNewDuration(e.target.value)} placeholder="120" /></div>}
+            {newType === 'Movie' && <div><label>Duración(minutos)</label><br/><input value={newDuration} max={999} min={0} type="number" onChange={e=>setNewDuration(e.target.value)} placeholder="120" /></div>}
             <div><label>Descripción</label><br/><textarea value={newDescription} onChange={e=>setNewDescription(e.target.value)} /></div>
             <div><label>Url Portada</label><br/><textarea value={newUrl} type="image" onChange={e=>setNewUrl(e.target.value)} /></div>
             <div style={{marginTop:8}}>
