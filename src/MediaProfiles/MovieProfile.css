@@ -36,6 +36,28 @@
   z-index: 0;
 }
 
+.movie-profile-volver-button {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 2500;
+}
+
+.movie-profile-volver-button button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ede6f3;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.movie-profile-volver-button button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
 .movie-profile-cover {
   position: fixed;
   top: 0;

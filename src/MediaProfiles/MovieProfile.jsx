@@ -5,8 +5,10 @@ import { db, auth } from '../firebaseconfig';
 import '../MediaProfiles/MovieProfile.css';
 import DefaultVideo from '../assets/placeholdervid.mp4';
 import DefaultCover from '../assets/placeholder.jpg';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 function MovieProfile() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [media, setMedia] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -180,10 +182,15 @@ function MovieProfile() {
 {/* PERFIL CONTENIDO */}
 
   return (
+
+    
     <div
       className="movie-profile-container"
       style={{ backgroundImage: `url(${getImageSrc(media.portada)})` }}
     >
+      <div className="movie-profile-volver-button">
+        <button onClick={() => {navigate('/main');}}>{"<"}</button>
+      </div>
       <div className="movie-profile-info-box">
         <div className="movie-profile-header">
           <img src={getImageSrc(media.portada)} alt={`${media.nombre} portada`} className="movie-profile-thumb" />
@@ -229,7 +236,7 @@ function MovieProfile() {
 
         {/* BOTONES */}
 
-        <div style={{ marginTop: 12 }}>
+        <div style={{ marginTop: 12 }}> 
           {!isSeries && (<button onClick={() => openPlayer(media.mov)}>Play</button>)}
           <button
             onClick={async () => {

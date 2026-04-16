@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
 import { auth, db } from './firebaseconfig';
+import './UserIndex.css';
 
 function UserIndex() {
   const navigate = useNavigate();
@@ -68,6 +69,9 @@ useEffect(() => {
     <div className="main">
       {loading && <p>Cargando...</p>}
       <div className="background"></div>
+      <div className="volver-button">
+        <button onClick={() => {navigate('/main');}}>{"<"}</button>
+      </div>
 
       {role === 'admin' && (
         <div className="content-section">
